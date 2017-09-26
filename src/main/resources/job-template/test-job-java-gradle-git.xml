@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <actions/>
+    <description></description>
+    <keepDependencies>false</keepDependencies>
+    <scm class="hudson.plugins.git.GitSCM" plugin="@SCM_GIT_PLUGIN_VERSION">
+        <configVersion>2</configVersion>
+        <userRemoteConfigs>
+            <hudson.plugins.git.UserRemoteConfig>
+                <url>@REPOSITORY_URL</url>
+                <credentialsId>@REPOSITORY_ACCOUNT_ID</credentialsId>
+            </hudson.plugins.git.UserRemoteConfig>
+        </userRemoteConfigs>
+        <branches>
+            <hudson.plugins.git.BranchSpec>
+                <name>*/@REPOSITORY_BRANCH</name>
+            </hudson.plugins.git.BranchSpec>
+        </branches>
+        <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+        <submoduleCfg class="list"/>
+        <extensions/>
+    </scm>
+    <canRoam>true</canRoam>
+    <disabled>false</disabled>
+    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <triggers/>
+    <concurrentBuild>false</concurrentBuild>
+    <builders>
+        <hudson.plugins.gradle.Gradle plugin="@GRADLE_PLUGIN_VERSION">
+            <switches></switches>
+            <tasks>test</tasks>
+            <rootBuildScriptDir></rootBuildScriptDir>
+            <buildFile></buildFile>
+            <gradleName>@GRADLE_NAME</gradleName>
+            <useWrapper>false</useWrapper>
+            <makeExecutable>false</makeExecutable>
+            <useWorkspaceAsHome>false</useWorkspaceAsHome>
+            <wrapperLocation></wrapperLocation>
+            <passAsProperties>false</passAsProperties>
+        </hudson.plugins.gradle.Gradle>
+        <hudson.plugins.sonar.SonarRunnerBuilder plugin="@SONAR_PLUGIN_VERSION">
+            <installationName>@SONAR_NAME</installationName>
+            <project></project>
+            <properties>sonar.projectName=@INSPECTION_PROJECT_NAME
+sonar.projectKey=@INSPECTION_PROJECT_KEY
+sonar.projectVersion=1.0
+sonar.sources=.
+sonar.junit.reportsPath=build/test-results/test
+sonar.jacoco.reportPath=build//jacoco/jacoco-overall.exec
+sonar.java.binaries=build/classes</properties>
+            <javaOpts></javaOpts>
+            <additionalArguments></additionalArguments>
+            <jdk>(Inherit From Job)</jdk>
+            <task></task>
+        </hudson.plugins.sonar.SonarRunnerBuilder>
+    </builders>
+    <publishers/>
+    <buildWrappers/>
+</project>

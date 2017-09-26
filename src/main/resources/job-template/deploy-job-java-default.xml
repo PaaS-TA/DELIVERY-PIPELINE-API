@@ -1,0 +1,118 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <actions/>
+    <description></description>
+    <keepDependencies>false</keepDependencies>
+    <properties>
+        <hudson.model.ParametersDefinitionProperty>
+            <parameterDefinitions>
+                <hudson.model.StringParameterDefinition>
+                    <name>DEPLOY_TYPE</name>
+                    <description></description>
+                    <defaultValue></defaultValue>
+                </hudson.model.StringParameterDefinition>
+                <hudson.model.StringParameterDefinition>
+                    <name>ORG_NAME</name>
+                    <description></description>
+                    <defaultValue></defaultValue>
+                </hudson.model.StringParameterDefinition>
+                <hudson.model.StringParameterDefinition>
+                    <name>SPACE_NAME</name>
+                    <description></description>
+                    <defaultValue></defaultValue>
+                </hudson.model.StringParameterDefinition>
+                <hudson.model.StringParameterDefinition>
+                    <name>BUILD_FILE_PATH</name>
+                    <description></description>
+                    <defaultValue></defaultValue>
+                </hudson.model.StringParameterDefinition>
+                <hudson.model.StringParameterDefinition>
+                    <name>BUILD_FILE_NAME</name>
+                    <description></description>
+                    <defaultValue></defaultValue>
+                </hudson.model.StringParameterDefinition>
+                <hudson.model.StringParameterDefinition>
+                    <name>BUILD_PACK_NAME</name>
+                    <description></description>
+                    <defaultValue></defaultValue>
+                </hudson.model.StringParameterDefinition>
+                <hudson.model.StringParameterDefinition>
+                    <name>APP_NAME</name>
+                    <description></description>
+                    <defaultValue></defaultValue>
+                </hudson.model.StringParameterDefinition>
+            </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+    </properties>
+    <scm class="hudson.scm.NullSCM"/>
+    <canRoam>true</canRoam>
+    <disabled>false</disabled>
+    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <triggers/>
+    <concurrentBuild>false</concurrentBuild>
+    <builders>
+        <hudson.tasks.Shell>
+            <command>echo "###### DEPLOY :: BEGIN"
+echo "#### SET VARIABLES"
+BLUE_APP_NAME=$APP_NAME
+GREEN_APP_NAME="${BLUE_APP_NAME}-GREEN"
+
+echo "#### CHANGE WORKSPACE"
+cd $WORKSPACE
+
+echo "#### EXECUTE CF LOGIN"
+cf login --skip-ssl-validation -a @CF_API_URL -u @CF_ACCOUNT_ID -p @CF_ACCOUNT_PASSWORD -o $ORG_NAME -s $SPACE_NAME
+
+
+if [ $DEPLOY_TYPE = "DEV" ]; then
+    echo "#### DEV DEPLOY :: BEGIN"
+    echo "## DEV DEPLOY :: GET BUILD FILE"
+    wget $BUILD_FILE_PATH -O $BUILD_FILE_NAME -q
+
+    echo "## DEV DEPLOY :: CF PUSH"
+    cf push $APP_NAME -b $BUILD_PACK_NAME -p ./$BUILD_FILE_NAME
+
+    echo "## DEV DEPLOY :: DELETE BUILD FILE"
+    rm -rf ./$BUILD_FILE_NAME
+    echo "#### DEV DEPLOY :: END"
+fi
+
+
+if [ $DEPLOY_TYPE = "BLUE_DEPLOY" ]; then
+    echo "#### BLUE DEPLOY :: BEGIN"
+    echo "## BLUE DEPLOY :: MAP ROUTE"
+    cf map-route $GREEN_APP_NAME @DOMAIN_NAME -n $BLUE_APP_NAME
+
+    echo "## BLUE DEPLOY :: DELETE BLUE APP"
+    cf delete $BLUE_APP_NAME -f
+
+    echo "## BLUE DEPLOY :: RENAME GREEN APP TO BLUE APP"
+    cf rename $GREEN_APP_NAME $BLUE_APP_NAME
+
+    echo "## BLUE DEPLOY :: DELETE GREEN APP ROUTE"
+    cf delete-route @DOMAIN_NAME -n $GREEN_APP_NAME -f
+    echo "#### BLUE DEPLOY :: END"
+fi
+
+
+if [ $DEPLOY_TYPE = "GREEN_DEPLOY" ]; then
+    echo "#### GREEN DEPLOY :: BEGIN"
+    echo "## GREEN DEPLOY :: GET BUILD FILE"
+    wget $BUILD_FILE_PATH -O $BUILD_FILE_NAME -q
+
+    echo "## GREEN DEPLOY :: CF PUSH"
+    cf push $GREEN_APP_NAME -b $BUILD_PACK_NAME -p ./$BUILD_FILE_NAME
+
+    echo "## GREEN DEPLOY :: DELETE BUILD FILE"
+    rm -rf ./$BUILD_FILE_NAME
+    echo "#### GREEN DEPLOY :: END"
+fi
+
+echo "###### DEPLOY :: END"
+            </command>
+        </hudson.tasks.Shell>
+    </builders>
+    <publishers/>
+    <buildWrappers/>
+</project>

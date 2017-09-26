@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <actions/>
+    <description></description>
+    <keepDependencies>false</keepDependencies>
+    <scm class="hudson.scm.SubversionSCM" plugin="@SVN_SCM_PLUGIN_VERSION">
+        <locations>
+            <hudson.scm.SubversionSCM_-ModuleLocation>
+                <remote>@REPOSITORY_URL</remote>
+                <credentialsId>@REPOSITORY_ACCOUNT_ID</credentialsId>
+                <local>.</local>
+                <depthOption>infinity</depthOption>
+                <ignoreExternalsOption>true</ignoreExternalsOption>
+            </hudson.scm.SubversionSCM_-ModuleLocation>
+        </locations>
+        <excludedRegions></excludedRegions>
+        <includedRegions></includedRegions>
+        <excludedUsers></excludedUsers>
+        <excludedRevprop></excludedRevprop>
+        <excludedCommitMessages></excludedCommitMessages>
+        <workspaceUpdater class="hudson.scm.subversion.CheckoutUpdater"/>
+        <ignoreDirPropChanges>false</ignoreDirPropChanges>
+        <filterChangelog>false</filterChangelog>
+    </scm>
+    <canRoam>true</canRoam>
+    <disabled>false</disabled>
+    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <triggers/>
+    <concurrentBuild>false</concurrentBuild>
+    <builders>
+        <hudson.tasks.Maven>
+            <targets>clean test org.jacoco:jacoco-maven-plugin:prepare-agent install</targets>
+            <mavenName>@MAVEN_NAME</mavenName>
+            <usePrivateRepository>false</usePrivateRepository>
+            <settings class="jenkins.mvn.DefaultSettingsProvider"/>
+            <globalSettings class="jenkins.mvn.DefaultGlobalSettingsProvider"/>
+            <injectBuildVariables>false</injectBuildVariables>
+        </hudson.tasks.Maven>
+        <hudson.plugins.sonar.SonarRunnerBuilder plugin="@SONAR_PLUGIN_VERSION">
+            <installationName>@SONAR_NAME</installationName>
+            <project></project>
+            <properties>sonar.projectName=@INSPECTION_PROJECT_NAME
+sonar.projectKey=@INSPECTION_PROJECT_KEY
+sonar.projectVersion=1.0
+sonar.sources=src
+sonar.junit.reportsPath=target/surefire-reports
+sonar.jacoco.reportPath=target/jacoco.exec
+sonar.java.binaries=target/classes</properties>
+            <javaOpts></javaOpts>
+            <additionalArguments></additionalArguments>
+            <jdk>(Inherit From Job)</jdk>
+            <task></task>
+        </hudson.plugins.sonar.SonarRunnerBuilder>
+    </builders>
+    <publishers/>
+    <buildWrappers/>
+</project>

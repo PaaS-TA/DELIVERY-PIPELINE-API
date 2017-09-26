@@ -1,0 +1,92 @@
+spring:
+  application:
+    name: paasta-delivery-pipeline-api
+  http:
+    multipart:
+      maxFileSize: 1000Mb
+      maxRequestSize: 1000Mb
+
+---
+spring:
+  profiles:
+    active: local
+
+server:
+  port: {SERVER-PORT}
+
+logging:
+  level:
+    ROOT: INFO
+  path: classpath:logback-spring.xml
+  file: logs/application.log
+
+commonApi:
+  url: COMMOM-API-URL
+  authorization:
+    id: COMMOM-API-AUTHORIZATION-ID
+    password: COMMOM-API-AUTHORIZATION-PASSWORD
+
+binaryStorageApi:
+  url: BINARY-STORAGE-API-URL
+  authorization:
+    id: BINARY-STORAGE-API-AUTHORIZATION-ID
+    password: BINARY-STORAGE-API-AUTHORIZATION-PASSWORD
+
+ci:
+  server:
+    url: CI-SERVER-URL
+    admin:
+      username: CI-SERVER-ADMIN-USER-NAME
+      password: CI-SERVER-ADMIN-PASSWORD
+    ssh:
+      username: CI-SERVER-SSH-USER-NAME
+      password: CI-SERVER-SSH-PASSWORD
+      port: CI-SERVER-SSH-PORT
+    credentials:
+      scope: "GLOBAL"
+      url: "/credentials/store/system/domain/_"
+      className: "com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl"
+    workspace:
+      path: "/var/vcap/store/jenkins_master/workspace/"
+
+---
+spring:
+  profiles: dev
+
+server:
+  port: {SERVER-PORT}
+
+logging:
+  level:
+    ROOT: DEBUG
+  path: classpath:logback-spring.xml
+  file: logs/application.log
+
+commonApi:
+  url: COMMOM-API-URL
+  authorization:
+    id: COMMOM-API-AUTHORIZATION-ID
+    password: COMMOM-API-AUTHORIZATION-PASSWORD
+
+binaryStorageApi:
+  url: BINARY-STORAGE-API-URL
+  authorization:
+    id: BINARY-STORAGE-API-AUTHORIZATION-ID
+    password: BINARY-STORAGE-API-AUTHORIZATION-PASSWORD
+
+ci:
+  server:
+    url: CI-SERVER-URL
+    admin:
+      username: CI-SERVER-ADMIN-USER-NAME
+      password: CI-SERVER-ADMIN-PASSWORD
+    ssh:
+      username: CI-SERVER-SSH-USER-NAME
+      password: CI-SERVER-SSH-PASSWORD
+      port: CI-SERVER-SSH-PORT
+    credentials:
+      scope: "GLOBAL"
+      url: "/credentials/store/system/domain/_"
+      className: "com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl"
+    workspace:
+      path: "/var/vcap/store/jenkins_master/workspace/"

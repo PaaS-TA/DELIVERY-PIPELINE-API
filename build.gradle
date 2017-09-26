@@ -1,0 +1,49 @@
+buildscript {
+    ext {
+        springBootVersion = '1.5.3.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'war'
+
+ext {
+    jenkinsClientVersion = '0.3.7'
+    springBootVersion = '1.5.3.RELEASE'
+    commonIoVersion = '2.5'
+    jcraftJschVersion = '0.1.54'
+    commonsCodecVersion = '1.10'
+}
+
+version '0.1'
+
+war {
+    baseName = 'paasta-delivery-pipeline-api'
+    version "$version"
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile("com.offbytwo.jenkins:jenkins-client:${jenkinsClientVersion}")
+    compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-aop:${springBootVersion}")
+    compile("commons-io:commons-io:${commonIoVersion}")
+    compile("com.jcraft:jsch:${jcraftJschVersion}")
+    compile("commons-codec:commons-codec:${commonsCodecVersion}")
+
+    testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+}
