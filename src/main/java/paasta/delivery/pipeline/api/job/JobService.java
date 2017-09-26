@@ -1068,7 +1068,7 @@ public class JobService {
         // JAVA :: DEFAULT
         String result = BuilderLanguage.JAVA.buildPackName;
 
-        // TODO :: CHECK GO
+        // TODO :: GO
         if (String.valueOf(BuilderLanguage.GO).equals(customJob.getBuilderType())) {
             result = BuilderLanguage.GO.buildPackName;
         }
