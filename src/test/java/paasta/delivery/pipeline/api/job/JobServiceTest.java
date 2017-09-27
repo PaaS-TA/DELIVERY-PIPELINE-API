@@ -954,7 +954,7 @@ public class JobServiceTest {
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + gTestJobModel.getId(), HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
         // GET JOB XML FROM TEMPLATE FILE
-        when(jobTemplateService.getBuildJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
+        when(jobTemplateService.getTestJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
         // UPDATE TEST JOB TO CI SERVER
         when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
         // UPDATE TEST JOB TO CI SERVER
@@ -995,7 +995,7 @@ public class JobServiceTest {
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + gTestJobModel.getId(), HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
         // GET JOB XML FROM TEMPLATE FILE
-        when(jobTemplateService.getBuildJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
+        when(jobTemplateService.getTestJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
         // UPDATE TEST JOB TO CI SERVER
         when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
         // UPDATE TEST JOB TO CI SERVER
@@ -1042,59 +1042,7 @@ public class JobServiceTest {
         // CREATE CREDENTIALS TO CI SERVER
         when(credentialsService.createCredentials(gTestJobModel)).thenReturn(null);
         // GET JOB XML FROM TEMPLATE FILE
-        when(jobTemplateService.getBuildJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
-        // CREATE DEPLOY JOB TO CI SERVER
-        when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
-        // CREATE DEPLOY JOB TO CI SERVER
-        doNothing().when(ciServer).createJob(JOB_GUID, JOB_XML, true);
-        // SET JOB NAME :: CHECK FROM DATABASE
-        when(restTemplateService.send(Constants.TARGET_COMMON_API, CHECK_EXISTED_JOB_NAME_URL + JOB_NAME, HttpMethod.GET, null, Integer.class)).thenReturn(0);
-        // SET APP URL :: CF INFO DETAIL FROM DATABASE
-        when(cfInfoService.getCfInfo(gTestJobModel)).thenReturn(testCfInfoModel);
-        // INSERT DEPLOY JOB TO DATABASE
-        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL, HttpMethod.POST, gTestJobModel, CustomJob.class)).thenReturn(gTestResultJobModel);
-        // SET JOB ORDER IN PIPELINE
-        // GET JOB LIST FROM DATABASE
-        when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
-        // GET JOB DETAIL FROM DATABASE
-        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
-
-
-        // TEST
-        CustomJob resultModel = jobService.createJob(gTestJobModel);
-
-        assertThat(resultModel).isNotNull();
-        assertEquals(Constants.RESULT_STATUS_SUCCESS, resultModel.getResultStatus());
-        assertEquals(JOB_NAME, resultModel.getJobName());
-    }
-
-
-    /**
-     * Create job deploy manifest use yn y valid model return model.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void createJob_DEPLOY_ManifestUseYn_Y_ValidModel_ReturnModel() throws Exception {
-        String reqUrl = REQ_PIPELINES_URL + PIPELINE_ID + REQ_URL;
-
-        gTestJobModel.setJobType(String.valueOf(JobService.JobType.DEPLOY));
-        gTestJobModel.setJobName(JOB_NAME);
-        gTestJobModel.setManifestUseYn(Constants.USE_YN_Y);
-        gTestJobModel.setManifestScript(MANIFEST_SCRIPT);
-
-        CfInfo testCfInfoModel = new CfInfo();
-        testCfInfoModel.setCfApiUrl(CF_API_URL);
-
-        gTestResultJobModel.setJobName(JOB_NAME);
-
-
-        // GET SERVICE INSTANCES DETAIL FROM DATABASE
-        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
-        // CREATE CREDENTIALS TO CI SERVER
-        when(credentialsService.createCredentials(gTestJobModel)).thenReturn(null);
-        // GET JOB XML FROM TEMPLATE FILE
-        when(jobTemplateService.getBuildJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
+        when(jobTemplateService.getDeployJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
         // CREATE DEPLOY JOB TO CI SERVER
         when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
         // CREATE DEPLOY JOB TO CI SERVER
@@ -1144,7 +1092,7 @@ public class JobServiceTest {
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + gTestJobModel.getId(), HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
         // GET JOB XML FROM TEMPLATE FILE
-        when(jobTemplateService.getBuildJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
+        when(jobTemplateService.getDeployJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
         // UPDATE DEPLOY JOB TO CI SERVER
         when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
         // UPDATE DEPLOY JOB TO CI SERVER
@@ -1206,7 +1154,7 @@ public class JobServiceTest {
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + gTestJobModel.getId(), HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
         // GET JOB XML FROM TEMPLATE FILE
-        when(jobTemplateService.getBuildJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
+        when(jobTemplateService.getDeployJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
         // UPDATE DEPLOY JOB TO CI SERVER
         when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
         // UPDATE DEPLOY JOB TO CI SERVER
@@ -1726,7 +1674,6 @@ public class JobServiceTest {
 
         assertThat(resultModel).isNotNull();
         assertEquals(Constants.RESULT_STATUS_SUCCESS, resultModel.getResultStatus());
-
     }
 
 }

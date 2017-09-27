@@ -14,7 +14,6 @@ import paasta.delivery.pipeline.api.cf.info.CfInfoService;
 import paasta.delivery.pipeline.api.common.CfInfo;
 import paasta.delivery.pipeline.api.common.Constants;
 import paasta.delivery.pipeline.api.job.CustomJob;
-import paasta.delivery.pipeline.api.job.config.JobConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -40,6 +39,9 @@ public class JobTemplateServiceTest {
     private static final String CF_ID = "test-cf-id";
     private static final String CF_PASSWORD = "test-cf-password";
     private static final String CF_API_URL = "test-cf-api-url";
+    private static final String MANIFEST_SCRIPT = "test-manifest-script\\n";
+
+    private static CustomJob gTestJobModel = null;
 
 
     @Mock
@@ -56,7 +58,17 @@ public class JobTemplateServiceTest {
      */
     @Before
     public void setUp() throws Exception {
+        gTestJobModel = new CustomJob();
+
+        gTestJobModel.setRepositoryUrl(REPOSITORY_URL);
+        gTestJobModel.setRepositoryAccountId(REPOSITORY_ACCOUNT_ID);
+        gTestJobModel.setRepositoryBranch(REPOSITORY_BRUNCH);
+        gTestJobModel.setInspectionProjectName(INSPECTION_PROJECT_NAME);
+        gTestJobModel.setInspectionProjectKey(INSPECTION_PROJECT_KEY);
+        gTestJobModel.setManifestUseYn(Constants.USE_YN_N);
+        gTestJobModel.setCfInfoId(1L);
     }
+
 
     /**
      * Tear down.
@@ -80,52 +92,22 @@ public class JobTemplateServiceTest {
      */
     @Test
     public void getBuildTemplate_ValidParamJava_ReturnString() throws Exception {
-        CustomJob testModel = new CustomJob();
-        testModel.setBuilderType(String.valueOf(JobConfig.BuilderType.GRADLE));
-        testModel.setRepositoryUrl(REPOSITORY_URL);
-        testModel.setRepositoryAccountId(REPOSITORY_ACCOUNT_ID);
-        testModel.setRepositoryBranch(REPOSITORY_BRUNCH);
-
-
         // TEST
-        String resultString = jobTemplateService.getBuildJobTemplate(testModel);
+        String resultString = jobTemplateService.getBuildJobTemplate(gTestJobModel);
 
         assertThat(resultString).isNotNull();
     }
 
+
     /**
-     * Gets build template valid param go return string.
+     * Gets test template valid param java return string.
      *
      * @throws Exception the exception
      */
     @Test
-    public void getBuildTemplate_ValidParamGo_ReturnString() throws Exception {
-        CustomJob testModel = new CustomJob();
-        testModel.setRepositoryUrl(REPOSITORY_URL);
-        testModel.setRepositoryAccountId(REPOSITORY_ACCOUNT_ID);
-        testModel.setRepositoryBranch(REPOSITORY_BRUNCH);
-
-
-        // TEST
-        String resultString = jobTemplateService.getBuildJobTemplate(testModel);
-
-        assertThat(resultString).isNotNull();
-    }
-
-
-    @Test
     public void getTestTemplate_ValidParamJava_ReturnString() throws Exception {
-        CustomJob testModel = new CustomJob();
-        testModel.setBuilderType(String.valueOf(JobConfig.BuilderType.GRADLE));
-        testModel.setRepositoryUrl(REPOSITORY_URL);
-        testModel.setRepositoryAccountId(REPOSITORY_ACCOUNT_ID);
-        testModel.setRepositoryBranch(REPOSITORY_BRUNCH);
-        testModel.setInspectionProjectName(INSPECTION_PROJECT_NAME);
-        testModel.setInspectionProjectKey(INSPECTION_PROJECT_KEY);
-
-
         // TEST
-        String resultString = jobTemplateService.getTestJobTemplate(testModel);
+        String resultString = jobTemplateService.getTestJobTemplate(gTestJobModel);
 
         assertThat(resultString).isNotNull();
     }
@@ -138,13 +120,7 @@ public class JobTemplateServiceTest {
      */
     @Test
     public void getDeployTemplate_ValidParamJava_ReturnString() throws Exception {
-        CustomJob testModel = new CustomJob();
         CfInfo cfInfo = new CfInfo();
-
-        long cfInfoId = 1L;
-
-        testModel.setManifestUseYn(Constants.USE_YN_N);
-        testModel.setCfInfoId(cfInfoId);
 
         cfInfo.setCfId(CF_ID);
         cfInfo.setCfPassword(CF_PASSWORD);
@@ -152,11 +128,38 @@ public class JobTemplateServiceTest {
 
 
         // GET CF INFO DETAIL
-        when(cfInfoService.getCfInfo(testModel)).thenReturn(cfInfo);
+        when(cfInfoService.getCfInfo(gTestJobModel)).thenReturn(cfInfo);
 
 
         // TEST
-        String resultString = jobTemplateService.getDeployJobTemplate(testModel);
+        String resultString = jobTemplateService.getDeployJobTemplate(gTestJobModel);
+
+        assertThat(resultString).isNotNull();
+    }
+
+
+    /**
+     * Gets deploy template valid param java set manifest use yn y return string.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void getDeployTemplate_ValidParamJava_setManifestUseYn_Y_ReturnString() throws Exception {
+        CfInfo cfInfo = new CfInfo();
+        cfInfo.setCfId(CF_ID);
+        cfInfo.setCfPassword(CF_PASSWORD);
+        cfInfo.setCfApiUrl(CF_API_URL);
+
+        gTestJobModel.setManifestUseYn(Constants.USE_YN_Y);
+        gTestJobModel.setManifestScript(MANIFEST_SCRIPT);
+
+
+        // GET CF INFO DETAIL
+        when(cfInfoService.getCfInfo(gTestJobModel)).thenReturn(cfInfo);
+
+
+        // TEST
+        String resultString = jobTemplateService.getDeployJobTemplate(gTestJobModel);
 
         assertThat(resultString).isNotNull();
     }
