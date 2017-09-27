@@ -710,8 +710,12 @@ public class JobServiceTest {
         gTestJobModel.setId(JOB_ID);
         gTestJobModel.setJobType(String.valueOf(JobService.JobType.BUILD));
         gTestJobModel.setJobName(JOB_NAME);
+        gTestJobModel.setRepositoryAccountId(REPOSITORY_ACCOUNT_ID);
+        gTestJobModel.setRepositoryAccountPassword(REPOSITORY_ACCOUNT_PASSWORD);
 
         gTestJobDetailModel.setJobName(JOB_NAME);
+        gTestJobDetailModel.setRepositoryAccountId(REPOSITORY_ACCOUNT_ID);
+        gTestJobDetailModel.setRepositoryAccountPassword(REPOSITORY_ACCOUNT_PASSWORD + "-1");
 
         gTestResultJobModel.setJobName(JOB_NAME);
 
@@ -720,6 +724,8 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + gTestJobModel.getId(), HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+        // UPDATE CREDENTIALS TO CI SERVER
+        when(credentialsService.updateCredentials(gTestJobModel)).thenReturn(null);
         // GET JOB XML FROM TEMPLATE FILE
         when(jobTemplateService.getBuildJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
         // UPDATE BUILD JOB TO CI SERVER
@@ -751,6 +757,7 @@ public class JobServiceTest {
         gTestJobModel.setId(JOB_ID);
         gTestJobModel.setJobType(String.valueOf(JobService.JobType.BUILD));
         gTestJobModel.setJobName(JOB_NAME);
+        gTestJobModel.setRepositoryAccountId(REPOSITORY_ACCOUNT_ID);
 
         gTestJobDetailModel.setJobName(JOB_NAME);
         gTestJobDetailModel.setRepositoryAccountId(REPOSITORY_ACCOUNT_ID + "-1");
@@ -795,9 +802,12 @@ public class JobServiceTest {
         gTestJobModel.setId(JOB_ID);
         gTestJobModel.setJobType(String.valueOf(JobService.JobType.BUILD));
         gTestJobModel.setJobName(JOB_NAME);
+        gTestJobModel.setRepositoryAccountId(REPOSITORY_ACCOUNT_ID);
+        gTestJobModel.setRepositoryAccountPassword(REPOSITORY_ACCOUNT_PASSWORD);
 
         gTestJobDetailModel.setJobName(JOB_NAME);
-        gTestJobDetailModel.setRepositoryAccountPassword(REPOSITORY_ACCOUNT_PASSWORD + "-1");
+        gTestJobDetailModel.setRepositoryAccountId(REPOSITORY_ACCOUNT_ID);
+        gTestJobDetailModel.setRepositoryAccountPassword(REPOSITORY_ACCOUNT_PASSWORD);
 
         gTestResultJobModel.setJobName(JOB_NAME);
 
@@ -806,8 +816,6 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + gTestJobModel.getId(), HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
-        // UPDATE CREDENTIALS TO CI SERVER
-        when(credentialsService.updateCredentials(gTestJobModel)).thenReturn(null);
         // GET JOB XML FROM TEMPLATE FILE
         when(jobTemplateService.getBuildJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
         // UPDATE BUILD JOB TO CI SERVER
@@ -967,6 +975,51 @@ public class JobServiceTest {
 
 
     /**
+     * Update job test set job name valid model return model.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void updateJob_TEST_setJobName_ValidModel_ReturnModel() throws Exception {
+        gTestJobModel.setId(JOB_ID);
+        gTestJobModel.setJobType(String.valueOf(JobService.JobType.TEST));
+        gTestJobModel.setJobName(JOB_NAME + "-1");
+
+        gTestJobDetailModel.setJobName(JOB_NAME);
+
+        gTestResultJobModel.setJobName(JOB_NAME);
+
+
+        // GET SERVICE INSTANCES DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
+        // GET JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + gTestJobModel.getId(), HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+        // GET JOB XML FROM TEMPLATE FILE
+        when(jobTemplateService.getBuildJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
+        // UPDATE TEST JOB TO CI SERVER
+        when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
+        // UPDATE TEST JOB TO CI SERVER
+        doNothing().when(ciServer).updateJob(JOB_GUID, JOB_XML, true);
+        // SET JOB NAME PHASE 1 :: CHECK FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, CHECK_EXISTED_JOB_NAME_URL + JOB_NAME + "-1", HttpMethod.GET, null, Integer.class)).thenReturn(1);
+        // SET JOB NAME PHASE 2 :: CHECK FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, CHECK_EXISTED_JOB_NAME_URL + JOB_NAME + "-2", HttpMethod.GET, null, Integer.class)).thenReturn(0);
+        // GET REPOSITORY COMMIT REVISION
+        when(repositoryService.getRepositoryInfo(String.valueOf(JOB_ID))).thenReturn(gTestResultJobModel);
+        // UPDATE TEST JOB TO DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL, HttpMethod.PUT, gTestJobModel, CustomJob.class)).thenReturn(gTestResultJobModel);
+
+
+        // TEST
+        CustomJob resultModel = jobService.updateJob(gTestJobModel);
+
+        assertThat(resultModel).isNotNull();
+        assertEquals(Constants.RESULT_STATUS_SUCCESS, resultModel.getResultStatus());
+        assertEquals(JOB_NAME, resultModel.getJobName());
+    }
+
+
+    /**
      * Create job deploy valid model return model.
      *
      * @throws Exception the exception
@@ -1096,6 +1149,72 @@ public class JobServiceTest {
         when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
         // UPDATE DEPLOY JOB TO CI SERVER
         doNothing().when(ciServer).updateJob(JOB_GUID, JOB_XML, true);
+        // SET APP URL :: CF INFO DETAIL FROM DATABASE
+        when(cfInfoService.getCfInfo(gTestJobModel)).thenReturn(testCfInfoModel);
+        // UPDATE DEPLOY JOB TO DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL, HttpMethod.PUT, gTestJobModel, CustomJob.class)).thenReturn(gTestResultJobModel);
+
+
+        // TEST
+        CustomJob resultModel = jobService.updateJob(gTestJobModel);
+
+        assertThat(resultModel).isNotNull();
+        assertEquals(Constants.RESULT_STATUS_SUCCESS, resultModel.getResultStatus());
+        assertEquals(JOB_NAME, resultModel.getJobName());
+        assertEquals(gTestResultJobModel.getJobTrigger(), resultModel.getJobTrigger());
+        assertEquals(gTestResultJobModel.getAppUrl(), resultModel.getAppUrl());
+        assertEquals(gTestResultJobModel.getManifestScript(), resultModel.getManifestScript());
+        assertEquals(gTestResultJobModel.getInspectionProjectId(), resultModel.getInspectionProjectId());
+        assertEquals(gTestResultJobModel.getInspectionProfileId(), resultModel.getInspectionProfileId());
+        assertEquals(gTestResultJobModel.getInspectionGateId(), resultModel.getInspectionGateId());
+        assertEquals(gTestResultJobModel.getCreated(), resultModel.getCreated());
+        assertEquals(gTestResultJobModel.getLastModified(), resultModel.getLastModified());
+        assertEquals(gTestResultJobModel.getBuildJobName(), resultModel.getBuildJobName());
+        assertEquals(gTestResultJobModel.getLastJobModified(), resultModel.getLastJobModified());
+        assertEquals(gTestResultJobModel.getLastSuccessJobNumber(), resultModel.getLastSuccessJobNumber());
+        assertEquals(gTestResultJobModel.getLastGroupOrder(), resultModel.getLastGroupOrder());
+        assertEquals(gTestResultJobModel.getDuration(), resultModel.getDuration());
+        assertEquals(gTestResultJobModel.getEstimatedDuration(), resultModel.getEstimatedDuration());
+        assertEquals(gTestResultJobModel.getConsoleOutputHtml(), resultModel.getConsoleOutputHtml());
+        assertEquals(gTestResultJobModel.getTimeStamp(), resultModel.getTimeStamp());
+        assertEquals(gTestResultJobModel.getBuildFilePath(), resultModel.getBuildFilePath());
+        assertEquals(gTestResultJobModel.getResultMessage(), resultModel.getResultMessage());
+    }
+
+
+    /**
+     * Update job deploy set job name valid model return model.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void updateJob_DEPLOY_setJobName_ValidModel_ReturnModel() throws Exception {
+        gTestJobModel.setId(JOB_ID);
+        gTestJobModel.setJobType(String.valueOf(JobService.JobType.DEPLOY));
+        gTestJobModel.setJobName(JOB_NAME + "-1");
+
+        gTestJobDetailModel.setJobName(JOB_NAME);
+
+        CfInfo testCfInfoModel = new CfInfo();
+        testCfInfoModel.setCfApiUrl(CF_API_URL);
+
+        gTestResultJobModel.setJobName(JOB_NAME);
+
+
+        // GET SERVICE INSTANCES DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
+        // GET JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + gTestJobModel.getId(), HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+        // GET JOB XML FROM TEMPLATE FILE
+        when(jobTemplateService.getBuildJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
+        // UPDATE DEPLOY JOB TO CI SERVER
+        when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
+        // UPDATE DEPLOY JOB TO CI SERVER
+        doNothing().when(ciServer).updateJob(JOB_GUID, JOB_XML, true);
+        // SET JOB NAME PHASE 1 :: CHECK FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, CHECK_EXISTED_JOB_NAME_URL + JOB_NAME + "-1", HttpMethod.GET, null, Integer.class)).thenReturn(1);
+        // SET JOB NAME PHASE 2 :: CHECK FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, CHECK_EXISTED_JOB_NAME_URL + JOB_NAME + "-2", HttpMethod.GET, null, Integer.class)).thenReturn(0);
         // SET APP URL :: CF INFO DETAIL FROM DATABASE
         when(cfInfoService.getCfInfo(gTestJobModel)).thenReturn(testCfInfoModel);
         // UPDATE DEPLOY JOB TO DATABASE
