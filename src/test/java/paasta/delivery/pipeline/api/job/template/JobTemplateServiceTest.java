@@ -14,6 +14,7 @@ import paasta.delivery.pipeline.api.cf.info.CfInfoService;
 import paasta.delivery.pipeline.api.common.CfInfo;
 import paasta.delivery.pipeline.api.common.Constants;
 import paasta.delivery.pipeline.api.job.CustomJob;
+import paasta.delivery.pipeline.api.job.config.JobConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -42,6 +43,7 @@ public class JobTemplateServiceTest {
     private static final String MANIFEST_SCRIPT = "test-manifest-script\\n";
 
     private static CustomJob gTestJobModel = null;
+    private static CfInfo gTestCfInfoModel = null;
 
 
     @Mock
@@ -59,6 +61,7 @@ public class JobTemplateServiceTest {
     @Before
     public void setUp() throws Exception {
         gTestJobModel = new CustomJob();
+        gTestCfInfoModel = new CfInfo();
 
         gTestJobModel.setRepositoryUrl(REPOSITORY_URL);
         gTestJobModel.setRepositoryAccountId(REPOSITORY_ACCOUNT_ID);
@@ -67,6 +70,10 @@ public class JobTemplateServiceTest {
         gTestJobModel.setInspectionProjectKey(INSPECTION_PROJECT_KEY);
         gTestJobModel.setManifestUseYn(Constants.USE_YN_N);
         gTestJobModel.setCfInfoId(1L);
+
+        gTestCfInfoModel.setCfId(CF_ID);
+        gTestCfInfoModel.setCfPassword(CF_PASSWORD);
+        gTestCfInfoModel.setCfApiUrl(CF_API_URL);
     }
 
 
@@ -92,6 +99,27 @@ public class JobTemplateServiceTest {
      */
     @Test
     public void getBuildTemplate_ValidParamJava_ReturnString() throws Exception {
+        gTestJobModel.setBuilderType(String.valueOf(JobConfig.BuilderType.GRADLE));
+
+
+        // TEST
+        String resultString = jobTemplateService.getBuildJobTemplate(gTestJobModel);
+
+        assertThat(resultString).isNotNull();
+    }
+
+
+    /**
+     * Gets build template valid param java maven scm svn return string.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void getBuildTemplate_ValidParamJava_MAVEN_SCM_SVN_ReturnString() throws Exception {
+        gTestJobModel.setBuilderType(String.valueOf(JobConfig.BuilderType.MAVEN));
+        gTestJobModel.setRepositoryType(String.valueOf(JobConfig.RepositoryType.SCM_SVN));
+
+
         // TEST
         String resultString = jobTemplateService.getBuildJobTemplate(gTestJobModel);
 
@@ -106,6 +134,9 @@ public class JobTemplateServiceTest {
      */
     @Test
     public void getTestTemplate_ValidParamJava_ReturnString() throws Exception {
+        gTestJobModel.setJobType(String.valueOf(JobConfig.JobType.TEST));
+
+
         // TEST
         String resultString = jobTemplateService.getTestJobTemplate(gTestJobModel);
 
@@ -120,15 +151,8 @@ public class JobTemplateServiceTest {
      */
     @Test
     public void getDeployTemplate_ValidParamJava_ReturnString() throws Exception {
-        CfInfo cfInfo = new CfInfo();
-
-        cfInfo.setCfId(CF_ID);
-        cfInfo.setCfPassword(CF_PASSWORD);
-        cfInfo.setCfApiUrl(CF_API_URL);
-
-
         // GET CF INFO DETAIL
-        when(cfInfoService.getCfInfo(gTestJobModel)).thenReturn(cfInfo);
+        when(cfInfoService.getCfInfo(gTestJobModel)).thenReturn(gTestCfInfoModel);
 
 
         // TEST
@@ -145,17 +169,12 @@ public class JobTemplateServiceTest {
      */
     @Test
     public void getDeployTemplate_ValidParamJava_setManifestUseYn_Y_ReturnString() throws Exception {
-        CfInfo cfInfo = new CfInfo();
-        cfInfo.setCfId(CF_ID);
-        cfInfo.setCfPassword(CF_PASSWORD);
-        cfInfo.setCfApiUrl(CF_API_URL);
-
         gTestJobModel.setManifestUseYn(Constants.USE_YN_Y);
         gTestJobModel.setManifestScript(MANIFEST_SCRIPT);
 
 
         // GET CF INFO DETAIL
-        when(cfInfoService.getCfInfo(gTestJobModel)).thenReturn(cfInfo);
+        when(cfInfoService.getCfInfo(gTestJobModel)).thenReturn(gTestCfInfoModel);
 
 
         // TEST
