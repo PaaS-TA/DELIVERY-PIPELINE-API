@@ -272,6 +272,7 @@ public class JobServiceTest {
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
 
+
         // TEST
         CustomJob resultModel = jobService.createJob(gTestJobModel);
 
@@ -324,6 +325,7 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+
 
         // TEST
         CustomJob resultModel = jobService.createJob(gTestJobModel);
@@ -378,6 +380,7 @@ public class JobServiceTest {
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
 
+
         // TEST
         CustomJob resultModel = jobService.createJob(gTestJobModel);
 
@@ -430,6 +433,7 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+
 
         // TEST
         CustomJob resultModel = jobService.createJob(gTestJobModel);
@@ -484,6 +488,7 @@ public class JobServiceTest {
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
 
+
         // TEST
         CustomJob resultModel = jobService.createJob(gTestJobModel);
 
@@ -505,8 +510,7 @@ public class JobServiceTest {
         gTestJobModel.setJobType(String.valueOf(JobService.JobType.BUILD));
         gTestJobModel.setJobName(JOB_NAME);
 
-        gTestJobDetailModel.setGroupOrder(2);
-
+        gTestResultJobModel.setGroupOrder(2);
         gTestResultJobModel.setJobName(JOB_NAME);
 
 
@@ -533,6 +537,7 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+
 
         // TEST
         CustomJob resultModel = jobService.createJob(gTestJobModel);
@@ -555,8 +560,7 @@ public class JobServiceTest {
         gTestJobModel.setJobType(String.valueOf(JobService.JobType.BUILD));
         gTestJobModel.setJobName(JOB_NAME);
 
-        gTestJobDetailModel.setJobOrder(2);
-
+        gTestResultJobModel.setJobOrder(2);
         gTestResultJobModel.setJobName(JOB_NAME);
 
 
@@ -583,6 +587,7 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+
 
         // TEST
         CustomJob resultModel = jobService.createJob(gTestJobModel);
@@ -605,9 +610,8 @@ public class JobServiceTest {
         gTestJobModel.setJobType(String.valueOf(JobService.JobType.BUILD));
         gTestJobModel.setJobName(JOB_NAME);
 
-        gTestJobDetailModel.setGroupOrder(2);
-        gTestJobDetailModel.setJobOrder(2);
-
+        gTestResultJobModel.setGroupOrder(2);
+        gTestResultJobModel.setJobOrder(2);
         gTestResultJobModel.setJobName(JOB_NAME);
 
 
@@ -634,6 +638,7 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+
 
         // TEST
         CustomJob resultModel = jobService.createJob(gTestJobModel);
@@ -652,12 +657,12 @@ public class JobServiceTest {
     @Test
     public void createJob_BUILD_setJobOrder_phase_4_ValidModel_ReturnModel() throws Exception {
         String reqUrl = REQ_PIPELINES_URL + PIPELINE_ID + REQ_URL;
+        long jobId = 3L;
 
         gTestJobModel.setJobType(String.valueOf(JobService.JobType.BUILD));
         gTestJobModel.setJobName(JOB_NAME);
 
-        gTestJobDetailModel.setId(3L);
-
+        gTestResultJobModel.setId(jobId);
         gTestResultJobModel.setJobName(JOB_NAME);
 
 
@@ -676,7 +681,7 @@ public class JobServiceTest {
         // INSERT BUILD JOB TO DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL, HttpMethod.POST, gTestJobModel, CustomJob.class)).thenReturn(gTestResultJobModel);
         // GET REPOSITORY COMMIT REVISION
-        when(repositoryService.getRepositoryInfo(String.valueOf(JOB_ID))).thenReturn(gTestResultJobModel);
+        when(repositoryService.getRepositoryInfo(String.valueOf(jobId))).thenReturn(gTestResultJobModel);
         // UPDATE BUILD JOB TO DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL, HttpMethod.PUT, gTestJobModel, CustomJob.class)).thenReturn(gTestResultJobModel);
         // SET JOB ORDER IN PIPELINE
@@ -684,6 +689,7 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+
 
         // TEST
         CustomJob resultModel = jobService.createJob(gTestJobModel);
