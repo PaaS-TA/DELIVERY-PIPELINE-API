@@ -350,13 +350,13 @@ public class JobService {
         String originalRepositoryAccountPassword = jobDetail.getRepositoryAccountPassword();
         String requestRepositoryAccountId = customJob.getRepositoryAccountId();
 
-        // CHECK REPOSITORY ID
+        // CHECK REPOSITORY ACCOUNT ID
         if (!originalRepositoryAccountId.equals(requestRepositoryAccountId)) {
             // CREATE CREDENTIALS TO CI SERVER
             credentialsService.createCredentials(customJob);
         }
 
-        // CHECK REPOSITORY ID AND REPOSITORY PASSWORD
+        // CHECK REPOSITORY ACCOUNT ID AND REPOSITORY ACCOUNT PASSWORD
         if (originalRepositoryAccountId.equals(requestRepositoryAccountId) && !originalRepositoryAccountPassword.equals(customJob.getRepositoryAccountPassword())) {
             // UPDATE CREDENTIALS :: CHANGE REPOSITORY ACCOUNT PASSWORD
             credentialsService.updateCredentials(customJob);
