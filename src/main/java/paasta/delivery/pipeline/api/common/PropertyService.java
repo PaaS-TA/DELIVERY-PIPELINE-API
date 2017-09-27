@@ -15,10 +15,6 @@ import org.springframework.stereotype.Service;
 public class PropertyService {
 
     // CI SERVER INFO
-    // TODO :: REMOVE
-    @Value("${ci.server.url}")
-    private String ciServerUrl;
-
     @Value("${ci.server.admin.username}")
     private String ciServerAdminUserName;
 
@@ -67,16 +63,6 @@ public class PropertyService {
 
     @Value("${binaryStorageApi.authorization.password}")
     private String binaryStorageApiAuthorizationPassword;
-
-
-    /**
-     * Gets ci server url.
-     *
-     * @return the ci server url
-     */
-    public String getCiServerUrl() {
-        return ciServerUrl;
-    }
 
 
     /**

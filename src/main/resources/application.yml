@@ -34,7 +34,6 @@ binaryStorageApi:
 
 ci:
   server:
-    url: CI-SERVER-URL
     admin:
       username: CI-SERVER-ADMIN-USER-NAME
       password: CI-SERVER-ADMIN-PASSWORD
@@ -76,7 +75,6 @@ binaryStorageApi:
 
 ci:
   server:
-    url: CI-SERVER-URL
     admin:
       username: CI-SERVER-ADMIN-USER-NAME
       password: CI-SERVER-ADMIN-PASSWORD
