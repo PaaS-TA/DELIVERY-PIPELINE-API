@@ -66,14 +66,4 @@ class DeployJobTemplate {
         return resultJobTemplate;
     }
 
-
-    /**
-     * Gets deploy template for go.
-     *
-     * @return the deploy template for go
-     */
-    public String getDeployJobTemplateForGo() {
-        return "getDeployJobTemplateForGo";
-    }
-
 }
