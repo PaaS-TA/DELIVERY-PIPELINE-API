@@ -10,17 +10,17 @@ package paasta.delivery.pipeline.api.common;
  */
 public class FileInfo {
 
-    private Long id;
+    private long id;
     private String originalFileName;
     private String storedFileName;
     private String fileUrl;
     private String resultStatus;
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 

@@ -11,16 +11,16 @@ package paasta.delivery.pipeline.api.job;
 public class CustomJob {
 
     // DATABASE COLUMNS
-    private Long id;
+    private long id;
     private String serviceInstancesId;
-    private Long pipelineId;
+    private long pipelineId;
     private String jobType;
     private String jobName;
     private String jobGuid;
     private int groupOrder;
     private int jobOrder;
     private String builderType;
-    private Long buildJobId;
+    private long buildJobId;
     private String jobTrigger;
     private String postActionYn;
     private String repositoryType;
@@ -30,7 +30,7 @@ public class CustomJob {
     private String repositoryAccountPassword;
     private String repositoryBranch;
     private String repositoryCommitRevision;
-    private Long cfInfoId;
+    private long cfInfoId;
     private String appName;
     private String appUrl;
     private String deployType;
@@ -80,11 +80,11 @@ public class CustomJob {
     private String resultStatus;
     private String resultMessage;
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -96,11 +96,11 @@ public class CustomJob {
         this.serviceInstancesId = serviceInstancesId;
     }
 
-    public Long getPipelineId() {
+    public long getPipelineId() {
         return pipelineId;
     }
 
-    public void setPipelineId(Long pipelineId) {
+    public void setPipelineId(long pipelineId) {
         this.pipelineId = pipelineId;
     }
 
@@ -152,11 +152,11 @@ public class CustomJob {
         this.builderType = builderType;
     }
 
-    public Long getBuildJobId() {
+    public long getBuildJobId() {
         return buildJobId;
     }
 
-    public void setBuildJobId(Long buildJobId) {
+    public void setBuildJobId(long buildJobId) {
         this.buildJobId = buildJobId;
     }
 
@@ -232,11 +232,11 @@ public class CustomJob {
         this.repositoryCommitRevision = repositoryCommitRevision;
     }
 
-    public Long getCfInfoId() {
+    public long getCfInfoId() {
         return cfInfoId;
     }
 
-    public void setCfInfoId(Long cfInfoId) {
+    public void setCfInfoId(long cfInfoId) {
         this.cfInfoId = cfInfoId;
     }
 
