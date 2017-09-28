@@ -828,7 +828,7 @@ public class JobService {
             Thread.currentThread().interrupt();
             throw new TriggerException("InterruptedException :: {}", e);
         } catch (Exception e) {
-            LOGGER.error("Exception :: {}", e);
+            throw new TriggerException("Exception :: {}", e);
         }
 
         return resultModel;
@@ -908,7 +908,7 @@ public class JobService {
             // SET PARAM :: UPDATE JOB DETAIL
             customJob.setRepositoryCommitRevision(repositoryInfoModel.getRepositoryCommitRevision());
 
-            // UPDATE BUILD JOB TO DATABASE
+            // UPDATE TEST JOB TO DATABASE
             procUpdateJobToDb(customJob);
 
             resultModel.setJobNumber(jobNumber);
