@@ -591,7 +591,7 @@ public class JobService {
         // DELETE JOB TO DATABASE
         restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + id, HttpMethod.DELETE, null, String.class);
 
-        // DELETE BUILT FILE OF JOB
+        // DELETE BUILT FILE OF BUILD JOB
         // GET JOB HISTORY LIST FROM DATABASE
         List jobHistoryList = restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + id + "/histories", HttpMethod.GET, null, List.class);
         int listSize = jobHistoryList.size();
