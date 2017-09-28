@@ -83,20 +83,20 @@ public class JobService {
 
 
     // Get Job List from DB
-    private List procGetJobList(Long pipelineId) {
+    private List procGetJobList(long pipelineId) {
         String reqUrl = REQ_PIPELINES_URL + pipelineId + REQ_URL;
         return restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class);
     }
 
 
     // Get Job Detail from DB
-    private CustomJob procGetJobDetail(Long id) {
+    private CustomJob procGetJobDetail(long id) {
         return restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + id, HttpMethod.GET, null, CustomJob.class);
     }
 
 
     // Get Job Max Group Order from DB
-    private int procGetJobMaxGroupOrder(Long pipelineId) {
+    private int procGetJobMaxGroupOrder(long pipelineId) {
         String reqUrl = REQ_PIPELINES_URL + pipelineId + "/max-job-group-order";
         return restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, Integer.class);
     }
@@ -133,7 +133,7 @@ public class JobService {
 
 
     // Set Job Name
-    private String procSetJobName(Long pipelineId, String jobName) {
+    private String procSetJobName(long pipelineId, String jobName) {
         String resultJobName = jobName;
 
         // CHECK EXISTED JOB NAME
@@ -168,7 +168,7 @@ public class JobService {
 
 
     // Check Existed Job Name
-    private boolean procCheckExistedJobName(Long pipelineId, String jobName) {
+    private boolean procCheckExistedJobName(long pipelineId, String jobName) {
         String reqUrl = REQ_PIPELINES_URL + pipelineId + "/job-names/" + jobName;
         return restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, Integer.class) > 0;
     }
@@ -305,7 +305,7 @@ public class JobService {
 
     // Set Job Order
     private void procSetJobOrder(CustomJob customJob, Enum requestOperation) {
-        Long currentJobId = customJob.getId();
+        long currentJobId = customJob.getId();
         int currentGroupOrder = customJob.getGroupOrder();
         int currentJobOrder = customJob.getJobOrder();
         int operationCount = 1;
@@ -321,11 +321,11 @@ public class JobService {
         for (Object aResultList : procGetJobList(customJob.getPipelineId())) {
             Map<String, Object> map = (Map<String, Object>) aResultList;
             int tempJobId = (int) map.get("id");
-            Long resultJobId = (long) tempJobId;
+            long resultJobId = (long) tempJobId;
             int resultGroupOrder = (int) map.get(GROUP_ORDER_STRING);
             int resultJobOrder = (int) map.get(JOB_ORDER_STRING);
 
-            if ((currentGroupOrder == resultGroupOrder) && (currentJobOrder <= resultJobOrder) && (!currentJobId.equals(resultJobId))) {
+            if ((currentGroupOrder == resultGroupOrder) && (currentJobOrder <= resultJobOrder) && (currentJobId != resultJobId)) {
                 // GET JOB DETAIL FROM DATABASE
                 CustomJob jobDetail = procGetJobDetail(resultJobId);
                 jobDetail.setJobOrder(jobDetail.getJobOrder() + operationCount);
@@ -609,7 +609,7 @@ public class JobService {
         resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
 
         // GET JOB DETAIL FROM DATABASE
-        CustomJob jobDetail = procGetJobDetail(Long.valueOf(id));
+        CustomJob jobDetail = procGetJobDetail(Long.parseLong(id));
 
         // GET SERVICE INSTANCES DETAIL FROM DATABASE
         // SET CI SERVER URL
@@ -969,13 +969,13 @@ public class JobService {
 
         String resultStatus;
         int jobNumber;
-        Long buildJobId = customJob.getBuildJobId();
-        Long jobHistoryId = customJob.getJobHistoryId();
+        long buildJobId = customJob.getBuildJobId();
+        long jobHistoryId = customJob.getJobHistoryId();
         long jobDuration;
         String reqUrl;
         String deployType = String.valueOf(JobConfig.DeployType.DEV);
         String blueGreenDeployStatus = customJob.getBlueGreenDeployStatus();
-        Long fileId;
+        long fileId;
 
         // GET BUILD JOB DETAIL FROM DATABASE
         CustomJob buildJobModel = procGetJobDetail(buildJobId);
@@ -1159,7 +1159,7 @@ public class JobService {
     private void procCancelQueueItem(JenkinsServer ciServer, CustomJob customJob) throws IOException {
         // GET QUEUE ITEM LIST FROM CI SERVER
         List<QueueItem> queueItemList = ciServer.getQueue().getItems();
-        Long queueItemId;
+        long queueItemId;
 
         if (!queueItemList.isEmpty()) {
             // GET JOB DETAIL FROM CI SERVER
@@ -1305,7 +1305,7 @@ public class JobService {
         CustomJob jobDetail = procGetJobDetail(customJob.getId());
 
         // SET PARAM
-        jobDetail.setId(null);
+        jobDetail.setId(0);
         jobDetail.setUserId(customJob.getUserId());
         jobDetail.setJobName(jobDetail.getJobName() + "-COPY");
         jobDetail.setJobOrder(jobDetail.getJobOrder() + 1);
