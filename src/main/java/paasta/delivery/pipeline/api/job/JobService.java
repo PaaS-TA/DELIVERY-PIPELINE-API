@@ -370,6 +370,9 @@ public class JobService {
             customJob.setJobName(procSetJobName(customJob.getPipelineId(), customJob.getJobName()));
         }
 
+        // UPDATE BUILD JOB TO DATABASE BEFORE UPDATED REPOSITORY COMMIT REVISION
+        procUpdateJobToDb(customJob);
+
         // GET REPOSITORY COMMIT REVISION
         CustomJob repositoryInfoModel = repositoryService.getRepositoryInfo(String.valueOf(jobId));
 
@@ -378,6 +381,36 @@ public class JobService {
 
         // UPDATE BUILD JOB TO DATABASE
         resultModel = procUpdateJobToDb(customJob);
+
+        // UPDATE TEST JOB LINKED TO BUILD JOB TO DATABASE
+        // GET JOB LIST FROM DATABASE
+        // LOOP
+        for (Object aResultList : procGetJobList(jobDetail.getPipelineId())) {
+            Map<String, Object> map = (Map<String, Object>) aResultList;
+            int tempJobId = (int) map.get("id");
+            long nextJobId = (long) tempJobId;
+            String nextJobType = (String) map.get("jobType");
+            int tempBuildJobId = (int) map.get("buildJobId");
+            long nextBuildJobId = (long) tempBuildJobId;
+
+            // CHECK
+            if (String.valueOf(JobType.TEST).equals(nextJobType) && jobId == nextBuildJobId) {
+                // GET JOB DETAIL FROM DATABASE
+                CustomJob testJobDetail = procGetJobDetail(nextJobId);
+                testJobDetail.setRepositoryType(customJob.getRepositoryType());
+                testJobDetail.setRepositoryUrl(customJob.getRepositoryUrl());
+                testJobDetail.setRepositoryId(customJob.getRepositoryId());
+                testJobDetail.setRepositoryAccountId(customJob.getRepositoryAccountId());
+                testJobDetail.setRepositoryBranch(customJob.getRepositoryBranch());
+                testJobDetail.setRepositoryCommitRevision(customJob.getRepositoryCommitRevision());
+
+                // SET REPOSITORY ACCOUNT PASSWORD BY AES256
+                testJobDetail.setRepositoryAccountPassword(commonService.setPasswordByAES256(Constants.AES256Type.ENCODE, customJob.getRepositoryAccountPassword()));
+
+                // UPDATE TEST JOB TO DATABASE
+                resultModel = procUpdateJobToDb(testJobDetail);
+            }
+        }
 
         return resultModel;
     }
@@ -907,6 +940,9 @@ public class JobService {
 
             // SET PARAM :: UPDATE JOB DETAIL
             customJob.setRepositoryCommitRevision(repositoryInfoModel.getRepositoryCommitRevision());
+
+            // SET REPOSITORY ACCOUNT PASSWORD BY AES256
+            customJob.setRepositoryAccountPassword(commonService.setPasswordByAES256(Constants.AES256Type.ENCODE, customJob.getRepositoryAccountPassword()));
 
             // UPDATE TEST JOB TO DATABASE
             procUpdateJobToDb(customJob);
