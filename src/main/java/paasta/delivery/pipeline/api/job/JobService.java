@@ -828,7 +828,7 @@ public class JobService {
             Thread.currentThread().interrupt();
             throw new TriggerException("InterruptedException :: {}", e);
         } catch (Exception e) {
-            throw new TriggerException("Exception :: {}", e);
+            throw new TriggerException("Exception :: TriggerBuildJob :: {}", e);
         }
 
         return resultModel;
@@ -919,7 +919,7 @@ public class JobService {
             Thread.currentThread().interrupt();
             throw new TriggerException("InterruptedException :: {}", e);
         } catch (Exception e) {
-            LOGGER.error("Exception :: {}", e);
+            throw new TriggerException("Exception :: TriggerTestJob :: {}", e);
         }
 
         return resultModel;

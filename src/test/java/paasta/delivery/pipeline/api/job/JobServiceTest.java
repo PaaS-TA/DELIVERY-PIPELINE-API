@@ -1703,12 +1703,35 @@ public class JobServiceTest {
         gTestResultJobModel.setPostActionYn(Constants.USE_YN_N);
         gTestResultJobModel.setLastJobStatus(Constants.RESULT_STATUS_SUCCESS);
 
+
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestResultJobModel);
         // GET JOB LIST FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestResultJobModel);
+
+
+        // TEST
+        jobService.triggerPostJob(gTestJobModel);
+    }
+
+
+    /**
+     * Trigger post job valid model last job status fail return model.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void triggerPostJob_ValidModel_LastJobStatus_Fail_ReturnModel() throws Exception {
+        gTestJobModel.setId(JOB_ID);
+
+        gTestResultJobModel.setPostActionYn(Constants.USE_YN_N);
+        gTestResultJobModel.setLastJobStatus(Constants.RESULT_STATUS_FAIL);
+
+
+        // GET JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestResultJobModel);
 
 
         // TEST
