@@ -112,6 +112,15 @@ if [ $DEPLOY_TYPE = "GREEN_DEPLOY" ]; then
     echo "#### GREEN DEPLOY :: END"
 fi
 
+
+if [ $DEPLOY_TYPE = "REVERT_GREEN_DEPLOY" ]; then
+    echo "## REVERT GREEN DEPLOY :: DELETE GREEN APP"
+    cf delete $GREEN_APP_NAME -f
+
+    echo "## REVERT GREEN DEPLOY :: DELETE GREEN APP ROUTE"
+    cf delete-route @DOMAIN_NAME -n $GREEN_APP_NAME -f
+fi
+
 echo "###### DEPLOY :: END"
             </command>
         </hudson.tasks.Shell>
