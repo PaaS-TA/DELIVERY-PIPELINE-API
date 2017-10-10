@@ -185,11 +185,15 @@ public class JobConfig {
         /**
          * Blue deploy blue green deploy status.
          */
-        BLUE_DEPLOY(),
+        BLUE_DEPLOY,
         /**
          * Green deploy blue green deploy status.
          */
-        GREEN_DEPLOY();
+        GREEN_DEPLOY,
+        /**
+         * Green deploy revert blue green deploy status.
+         */
+        REVERT_GREEN_DEPLOY;
     }
 
 
