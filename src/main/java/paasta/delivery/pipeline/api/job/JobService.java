@@ -34,6 +34,7 @@ import java.util.*;
 public class JobService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobService.class);
+
     private static final String REQ_URL = "/jobs";
     private static final String REQ_PIPELINES_URL = "/pipelines/";
     private static final String REQ_HISTORY_URL = "/histories";
@@ -44,6 +45,22 @@ public class JobService {
     private static final String URL_PROTOCOL_STRING = "http://";
     private static final String GROUP_ORDER_STRING = "groupOrder";
     private static final String JOB_ORDER_STRING = "jobOrder";
+
+    private static final String TARGET_COMMON_API = Constants.TARGET_COMMON_API;
+    private static final String RESULT_STATUS_SUCCESS = Constants.RESULT_STATUS_SUCCESS;
+    private static final String RESULT_STATUS_FAIL = Constants.RESULT_STATUS_FAIL;
+    private static final String USE_YN_Y = Constants.USE_YN_Y;
+    private static final String JOB_TYPE_BUILD = String.valueOf(JobType.BUILD);
+    private static final String JOB_TYPE_TEST = String.valueOf(JobType.TEST);
+    private static final String JOB_TYPE_DEPLOY = String.valueOf(JobType.DEPLOY);
+    private static final String DEPLOY_TYPE_DEV = String.valueOf(JobConfig.DeployType.DEV);
+    private static final String DEPLOY_TYPE_PRD = String.valueOf(JobConfig.DeployType.PRD);
+    private static final String REVERT_GREEN_DEPLOY = String.valueOf(JobConfig.BlueGreenDeployStatus.REVERT_GREEN_DEPLOY);
+    private static final String GREEN_DEPLOY = String.valueOf(JobConfig.BlueGreenDeployStatus.GREEN_DEPLOY);
+    private static final String PREVIOUS_JOB_SUCCESS = String.valueOf(JobTriggerType.PREVIOUS_JOB_SUCCESS);
+    private static final String MANUAL_TRIGGER = String.valueOf(JobTriggerType.MANUAL_TRIGGER);
+    private static final String JOB_WORKING = String.valueOf(JobTriggerStatusType.JOB_WORKING);
+    private static final String BUILT_FILE_UPLOADING = String.valueOf(JobTriggerStatusType.BUILT_FILE_UPLOADING);
 
     private final CommonService commonService;
     private final RestTemplateService restTemplateService;
@@ -85,50 +102,50 @@ public class JobService {
     // Get Job List from DB
     private List procGetJobList(long pipelineId) {
         String reqUrl = REQ_PIPELINES_URL + pipelineId + REQ_URL;
-        return restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class);
+        return restTemplateService.send(TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class);
     }
 
 
     // Get Job Detail from DB
     private CustomJob procGetJobDetail(long id) {
-        return restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + id, HttpMethod.GET, null, CustomJob.class);
+        return restTemplateService.send(TARGET_COMMON_API, REQ_URL + "/" + id, HttpMethod.GET, null, CustomJob.class);
     }
 
 
     // Get Job Max Group Order from DB
     private int procGetJobMaxGroupOrder(long pipelineId) {
         String reqUrl = REQ_PIPELINES_URL + pipelineId + "/max-job-group-order";
-        return restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, Integer.class);
+        return restTemplateService.send(TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, Integer.class);
     }
 
 
     // Create Job to DB
     private CustomJob procCreateJobToDb(CustomJob customJob) {
-        return restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL, HttpMethod.POST, customJob, CustomJob.class);
+        return restTemplateService.send(TARGET_COMMON_API, REQ_URL, HttpMethod.POST, customJob, CustomJob.class);
     }
 
 
     // Update Job to DB
     private CustomJob procUpdateJobToDb(CustomJob customJob) {
-        return restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL, HttpMethod.PUT, customJob, CustomJob.class);
+        return restTemplateService.send(TARGET_COMMON_API, REQ_URL, HttpMethod.PUT, customJob, CustomJob.class);
     }
 
 
     // Create Job History to DB
     private JobHistory procCreateJobHistoryToDb(JobHistory jobHistory) {
-        return restTemplateService.send(Constants.TARGET_COMMON_API, REQ_JOB_HISTORY_URL, HttpMethod.POST, jobHistory, JobHistory.class);
+        return restTemplateService.send(TARGET_COMMON_API, REQ_JOB_HISTORY_URL, HttpMethod.POST, jobHistory, JobHistory.class);
     }
 
 
     // Update Job History to DB
     private void procUpdateJobHistoryToDb(JobHistory jobHistory) {
-        restTemplateService.send(Constants.TARGET_COMMON_API, REQ_JOB_HISTORY_URL, HttpMethod.PUT, jobHistory, JobHistory.class);
+        restTemplateService.send(TARGET_COMMON_API, REQ_JOB_HISTORY_URL, HttpMethod.PUT, jobHistory, JobHistory.class);
     }
 
 
     // Get Service Instances Detail from DB
     private ServiceInstances procGetServiceInstances(String serviceInstancesId) {
-        return restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + serviceInstancesId, HttpMethod.GET, null, ServiceInstances.class);
+        return restTemplateService.send(TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + serviceInstancesId, HttpMethod.GET, null, ServiceInstances.class);
     }
 
 
@@ -170,7 +187,7 @@ public class JobService {
     // Check Existed Job Name
     private boolean procCheckExistedJobName(long pipelineId, String jobName) {
         String reqUrl = REQ_PIPELINES_URL + pipelineId + "/job-names/" + jobName;
-        return restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, Integer.class) > 0;
+        return restTemplateService.send(TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, Integer.class) > 0;
     }
 
 
@@ -189,12 +206,12 @@ public class JobService {
      */
     CustomJob createJob(CustomJob customJob) throws IOException {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
         String reqJobType = customJob.getJobType();
 
         // SET JOB GROUP ORDER IF CHECKING NEW WORK GROUP
-        if (Constants.USE_YN_Y.equals(customJob.getNewWorkGroupYn())) {
+        if (USE_YN_Y.equals(customJob.getNewWorkGroupYn())) {
             // GET JOB MAX GROUP ORDER FROM DATABASE
             customJob.setGroupOrder(procGetJobMaxGroupOrder(customJob.getPipelineId()) + 1);
             customJob.setJobOrder(1);
@@ -205,17 +222,17 @@ public class JobService {
         customJob.setCiServerUrl(procGetServiceInstances(customJob.getServiceInstancesId()).getCiServerUrl());
 
         // BUILD JOB
-        if (String.valueOf(JobType.BUILD).equals(reqJobType)) {
+        if (JOB_TYPE_BUILD.equals(reqJobType)) {
             resultModel = procCreateBuildJob(customJob);
         }
 
         // TEST JOB
-        if (String.valueOf(JobType.TEST).equals(reqJobType)) {
+        if (JOB_TYPE_TEST.equals(reqJobType)) {
             resultModel = procCreateTestJob(customJob);
         }
 
         // DEPLOY JOB
-        if (String.valueOf(JobType.DEPLOY).equals(reqJobType)) {
+        if (JOB_TYPE_DEPLOY.equals(reqJobType)) {
             resultModel = procCreateDeployJob(customJob);
         }
 
@@ -235,7 +252,7 @@ public class JobService {
      */
     CustomJob updateJob(CustomJob customJob) throws IOException {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
         String reqJobType = customJob.getJobType();
 
@@ -244,17 +261,17 @@ public class JobService {
         customJob.setCiServerUrl(procGetServiceInstances(customJob.getServiceInstancesId()).getCiServerUrl());
 
         // BUILD JOB
-        if (String.valueOf(JobType.BUILD).equals(reqJobType)) {
+        if (JOB_TYPE_BUILD.equals(reqJobType)) {
             resultModel = procUpdateBuildJob(customJob);
         }
 
         // TEST JOB
-        if (String.valueOf(JobType.TEST).equals(reqJobType)) {
+        if (JOB_TYPE_TEST.equals(reqJobType)) {
             resultModel = procUpdateTestJob(customJob);
         }
 
         // DEPLOY JOB
-        if (String.valueOf(JobType.DEPLOY).equals(reqJobType)) {
+        if (JOB_TYPE_DEPLOY.equals(reqJobType)) {
             resultModel = procUpdateDeployJob(customJob);
         }
 
@@ -265,7 +282,7 @@ public class JobService {
     // Create Build Job
     private CustomJob procCreateBuildJob(CustomJob customJob) throws IOException {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
         String jobGuid = procSetJobGuid(JobType.BUILD);
         customJob.setJobGuid(jobGuid);
@@ -340,7 +357,7 @@ public class JobService {
     // Update Build Job
     private CustomJob procUpdateBuildJob(CustomJob customJob) throws IOException {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
         long jobId = customJob.getId();
 
         // GET JOB DETAIL FROM DATABASE
@@ -394,7 +411,7 @@ public class JobService {
             long nextBuildJobId = (long) tempBuildJobId;
 
             // CHECK
-            if (String.valueOf(JobType.TEST).equals(nextJobType) && jobId == nextBuildJobId) {
+            if (JOB_TYPE_TEST.equals(nextJobType) && jobId == nextBuildJobId) {
                 // GET JOB DETAIL FROM DATABASE
                 CustomJob testJobDetail = procGetJobDetail(nextJobId);
                 testJobDetail.setRepositoryType(customJob.getRepositoryType());
@@ -419,7 +436,7 @@ public class JobService {
     // Create Test Job
     private CustomJob procCreateTestJob(CustomJob customJob) throws IOException {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
         String jobGuid = procSetJobGuid(JobType.TEST);
         customJob.setJobGuid(jobGuid);
 
@@ -485,7 +502,7 @@ public class JobService {
     // Update Test Job
     private CustomJob procUpdateTestJob(CustomJob customJob) throws IOException {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
         long jobId = customJob.getId();
         String reqJobName = customJob.getJobName();
@@ -540,7 +557,7 @@ public class JobService {
     // Create Deploy Job
     private CustomJob procCreateDeployJob(CustomJob customJob) throws IOException {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
         String jobGuid = procSetJobGuid(JobType.DEPLOY);
         customJob.setJobGuid(jobGuid);
@@ -572,7 +589,7 @@ public class JobService {
     // Update Deploy Job
     private CustomJob procUpdateDeployJob(CustomJob customJob) throws IOException {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
         String reqJobName = customJob.getJobName();
 
@@ -606,7 +623,7 @@ public class JobService {
      */
     CustomJob deleteJob(String id) throws IOException {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
         // GET JOB DETAIL FROM DATABASE
         CustomJob jobDetail = procGetJobDetail(Long.parseLong(id));
@@ -622,11 +639,11 @@ public class JobService {
         jobBuiltFileService.deleteWorkspace(jobDetail);
 
         // DELETE JOB TO DATABASE
-        restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + id, HttpMethod.DELETE, null, String.class);
+        restTemplateService.send(TARGET_COMMON_API, REQ_URL + "/" + id, HttpMethod.DELETE, null, String.class);
 
         // DELETE BUILT FILE OF BUILD JOB
         // GET JOB HISTORY LIST FROM DATABASE
-        List jobHistoryList = restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + id + "/histories", HttpMethod.GET, null, List.class);
+        List jobHistoryList = restTemplateService.send(TARGET_COMMON_API, REQ_URL + "/" + id + "/histories", HttpMethod.GET, null, List.class);
         int listSize = jobHistoryList.size();
 
         if (listSize > 0) {
@@ -634,21 +651,21 @@ public class JobService {
                 Map<String, Object> map = (Map<String, Object>) aJobHistoryList;
                 int fileId = (int) map.get("fileId");
 
-                if (String.valueOf(JobType.BUILD).equals(jobDetail.getJobType()) && (fileId > 0)) {
+                if (JOB_TYPE_BUILD.equals(jobDetail.getJobType()) && (fileId > 0)) {
                     // GET FILE DETAIL FROM DATABASE
-                    FileInfo fileInfo = restTemplateService.send(Constants.TARGET_COMMON_API, REQ_FILE_URL + "/" + fileId, HttpMethod.GET, null, FileInfo.class);
+                    FileInfo fileInfo = restTemplateService.send(TARGET_COMMON_API, REQ_FILE_URL + "/" + fileId, HttpMethod.GET, null, FileInfo.class);
 
                     // DELETE BUILT FILE OF JOB IN BINARY STORAGE SERVER
                     restTemplateService.send(Constants.TARGET_BINARY_STORAGE_API, REQ_FILE_URL + "/fileDelete", HttpMethod.POST, fileInfo, String.class);
 
                     // DELETE BUILT FILE OF JOB
-                    restTemplateService.send(Constants.TARGET_COMMON_API, REQ_FILE_URL + "/" + fileInfo.getId(), HttpMethod.DELETE, null, String.class);
+                    restTemplateService.send(TARGET_COMMON_API, REQ_FILE_URL + "/" + fileInfo.getId(), HttpMethod.DELETE, null, String.class);
                 }
             }
         }
 
         // DELETE JOB HISTORY TO DATABASE
-        restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + id + REQ_HISTORY_URL, HttpMethod.DELETE, null, String.class);
+        restTemplateService.send(TARGET_COMMON_API, REQ_URL + "/" + id + REQ_HISTORY_URL, HttpMethod.DELETE, null, String.class);
 
         // SET JOB ORDER :: SET TO DATABASE
         procSetJobOrder(jobDetail, OperationType.DECREASE);
@@ -666,16 +683,34 @@ public class JobService {
      */
     CustomJob triggerJob(CustomJob customJob, JobHistory jobHistory) {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_FAIL);
+        resultModel.setResultStatus(RESULT_STATUS_FAIL);
 
         String schedulerModifiedPushYn = customJob.getSchedulerModifiedPushYn();
+        String blueGreenDeployStatus;
 
         // GET JOB DETAIL FROM DATABASE
         CustomJob jobDetail = procGetJobDetail(customJob.getId());
         jobDetail.setJobHistoryId(customJob.getJobHistoryId());
 
+        if (JOB_TYPE_DEPLOY.equals(jobDetail.getJobType())) {
+            blueGreenDeployStatus = customJob.getBlueGreenDeployStatus();
+
+            // CHECK REVERT GREEN DEPLOY
+            if (null != blueGreenDeployStatus && REVERT_GREEN_DEPLOY.equals(blueGreenDeployStatus)) {
+                jobDetail.setBlueGreenDeployStatus(blueGreenDeployStatus);
+
+            } else {
+                if (REVERT_GREEN_DEPLOY.equals(jobDetail.getBlueGreenDeployStatus())) {
+                    jobDetail.setBlueGreenDeployStatus(GREEN_DEPLOY);
+                }
+            }
+
+            // UPDATE DEPLOY JOB TO DATABASE
+            procUpdateJobToDb(jobDetail);
+        }
+
         // CHECK MODIFIED PUSH CALLED FROM SCHEDULER
-        if (null != schedulerModifiedPushYn && Constants.USE_YN_Y.equals(schedulerModifiedPushYn)) {
+        if (null != schedulerModifiedPushYn && USE_YN_Y.equals(schedulerModifiedPushYn)) {
             jobDetail.setTriggerType(String.valueOf(JobTriggerType.MODIFIED_PUSH));
         }
 
@@ -689,7 +724,7 @@ public class JobService {
     // Trigger Job
     private CustomJob procTriggerJob(CustomJob customJob, JobHistory jobHistory) {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_FAIL);
+        resultModel.setResultStatus(RESULT_STATUS_FAIL);
 
         customJob.setJobNumber(customJob.getJobNumber() + 1);
         String reqJobType = customJob.getJobType();
@@ -699,17 +734,17 @@ public class JobService {
         customJob.setCiServerUrl(procGetServiceInstances(customJob.getServiceInstancesId()).getCiServerUrl());
 
         // BUILD JOB
-        if (String.valueOf(JobType.BUILD).equals(reqJobType)) {
+        if (JOB_TYPE_BUILD.equals(reqJobType)) {
             resultModel = procTriggerBuildJob(customJob, jobHistory);
         }
 
         // TEST JOB
-        if (String.valueOf(JobType.TEST).equals(reqJobType)) {
+        if (JOB_TYPE_TEST.equals(reqJobType)) {
             resultModel = procTriggerTestJob(customJob, jobHistory);
         }
 
         // DEPLOY JOB
-        if (String.valueOf(JobType.DEPLOY).equals(reqJobType)) {
+        if (JOB_TYPE_DEPLOY.equals(reqJobType)) {
             resultModel = procTriggerDeployJob(customJob, jobHistory);
         }
 
@@ -731,8 +766,8 @@ public class JobService {
         // CHECK POST ACTION AND CHECK LAST JOB STATUS
         // "Y" = STOP IF JOB FAIL
         // "N" = CONTINUE IF JOB FAIL
-        if ((Constants.USE_YN_Y.equals(jobDetail.getPostActionYn()) && !Constants.RESULT_STATUS_SUCCESS.equals(jobDetail.getLastJobStatus()))
-                || !Constants.RESULT_STATUS_SUCCESS.equals(jobDetail.getLastJobStatus())) {
+        if ((USE_YN_Y.equals(jobDetail.getPostActionYn()) && !RESULT_STATUS_SUCCESS.equals(jobDetail.getLastJobStatus()))
+                || !RESULT_STATUS_SUCCESS.equals(jobDetail.getLastJobStatus())) {
             return;
         }
 
@@ -762,11 +797,11 @@ public class JobService {
 
                 // GET JOB DETAIL FROM DATABASE
                 CustomJob nextJobDetail = procGetJobDetail(nextJobId);
-                nextJobDetail.setTriggerType(String.valueOf(JobTriggerType.PREVIOUS_JOB_SUCCESS));
+                nextJobDetail.setTriggerType(PREVIOUS_JOB_SUCCESS);
                 nextJobDetail.setPreviousJobNumber(previousJobNumber);
 
                 // TRIGGER JOB AND CHECK RESULT STATUS
-                if (Constants.RESULT_STATUS_SUCCESS.equals(procTriggerJob(nextJobDetail, new JobHistory()).getResultStatus())) {
+                if (RESULT_STATUS_SUCCESS.equals(procTriggerJob(nextJobDetail, new JobHistory()).getResultStatus())) {
                     // TRIGGER POST JOB
                     triggerPostJob(nextJobDetail);
                     break;
@@ -782,9 +817,9 @@ public class JobService {
     private boolean procCheckTriggerPostJobStatus(String jobTrigger, String jobType, String deployType) {
         boolean result = false;
 
-        if ((null != jobTrigger) && (String.valueOf(JobTriggerType.PREVIOUS_JOB_SUCCESS).equals(jobTrigger))) {
-            if ((null != jobType) && (String.valueOf(JobType.DEPLOY).equals(jobType))) {
-                if ((null != deployType) && (!String.valueOf(JobConfig.DeployType.PRD).equals(deployType))) {
+        if ((null != jobTrigger) && (PREVIOUS_JOB_SUCCESS.equals(jobTrigger))) {
+            if ((null != jobType) && (JOB_TYPE_DEPLOY.equals(jobType))) {
+                if ((null != deployType) && (!DEPLOY_TYPE_PRD.equals(deployType))) {
                     result = true;
                 }
             } else {
@@ -799,7 +834,7 @@ public class JobService {
     // Trigger Build Job
     private CustomJob procTriggerBuildJob(CustomJob customJob, JobHistory jobHistory) {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_FAIL);
+        resultModel.setResultStatus(RESULT_STATUS_FAIL);
 
         try {
             String resultStatus;
@@ -819,10 +854,10 @@ public class JobService {
             jobNumber = buildWithDetails.getNumber();
             jobDuration = buildWithDetails.getDuration();
 
-            if (Constants.RESULT_STATUS_SUCCESS.equals(resultStatus)) {
+            if (RESULT_STATUS_SUCCESS.equals(resultStatus)) {
                 // SET PARAM :: UPDATE BUILD JOB HISTORY TO DATABASE
                 jobHistoryInsertResultModel.setJobNumber(jobNumber);
-                jobHistoryInsertResultModel.setStatus(String.valueOf(JobTriggerStatusType.BUILT_FILE_UPLOADING));
+                jobHistoryInsertResultModel.setStatus(BUILT_FILE_UPLOADING);
 
                 // UPDATE BUILD JOB HISTORY TO DATABASE
                 procUpdateJobHistoryToDb(jobHistoryInsertResultModel);
@@ -853,7 +888,7 @@ public class JobService {
 
             resultModel.setJobNumber(jobNumber);
             resultModel.setDuration(jobDuration);
-            resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+            resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
         } catch (IOException e) {
             throw new TriggerException("IOException :: {}", e);
@@ -880,11 +915,11 @@ public class JobService {
         jobHistory.setJobId(customJob.getId());
         jobHistory.setPreviousJobNumber(previousJobNumber);
         jobHistory.setJobNumber(0);
-        jobHistory.setStatus(String.valueOf(JobTriggerStatusType.JOB_WORKING));
-        jobHistory.setTriggerType((null != triggerType) ? triggerType : String.valueOf(JobTriggerType.MANUAL_TRIGGER));
+        jobHistory.setStatus(JOB_WORKING);
+        jobHistory.setTriggerType((null != triggerType) ? triggerType : MANUAL_TRIGGER);
 
         // CHECK PREVIOUS JOB NUMBER
-        if (String.valueOf(JobTriggerType.MANUAL_TRIGGER).equals(jobHistory.getTriggerType()) && 0 == previousJobNumber && 1 < jobOrder) {
+        if (MANUAL_TRIGGER.equals(jobHistory.getTriggerType()) && 0 == previousJobNumber && 1 < jobOrder) {
 
             // GET JOB LIST FROM DATABASE
             // LOOP
@@ -896,9 +931,9 @@ public class JobService {
             }
         }
 
-        // CHECK ROLLBACK OF DEPLOY JOB
-        if ((String.valueOf(JobConfig.JobType.DEPLOY).equals(customJob.getJobType())) && (0 < customJob.getJobHistoryId())) {
-            jobHistory.setTriggerType(String.valueOf(JobTriggerType.ROLLBACK));
+        // CHECK ROLL BACK OF DEPLOY JOB
+        if (JOB_TYPE_DEPLOY.equals(customJob.getJobType()) && (0 < customJob.getJobHistoryId())) {
+            jobHistory.setTriggerType(String.valueOf(JobTriggerType.ROLL_BACK));
         }
 
         // INSERT BUILD JOB HISTORY TO DATABASE
@@ -909,7 +944,7 @@ public class JobService {
     // Trigger Test Job
     private CustomJob procTriggerTestJob(CustomJob customJob, JobHistory jobHistory) {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_FAIL);
+        resultModel.setResultStatus(RESULT_STATUS_FAIL);
 
         try {
             String resultStatus;
@@ -949,7 +984,7 @@ public class JobService {
 
             resultModel.setJobNumber(jobNumber);
             resultModel.setDuration(jobDuration);
-            resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+            resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -965,7 +1000,7 @@ public class JobService {
     // Trigger Deploy Job
     private CustomJob procTriggerDeployJob(CustomJob customJob, JobHistory jobHistory) {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_FAIL);
+        resultModel.setResultStatus(RESULT_STATUS_FAIL);
 
         String resultStatus;
         int jobNumber;
@@ -973,7 +1008,7 @@ public class JobService {
         long jobHistoryId = customJob.getJobHistoryId();
         long jobDuration;
         String reqUrl;
-        String deployType = String.valueOf(JobConfig.DeployType.DEV);
+        String deployType = DEPLOY_TYPE_DEV;
         String blueGreenDeployStatus = customJob.getBlueGreenDeployStatus();
         long fileId;
 
@@ -1024,7 +1059,7 @@ public class JobService {
 
         // GET BUILT FILE INFO FROM JOB HISTORY
         // GET JOB HISTORY FROM DATABASE
-        fileId = restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, JobHistory.class).getFileId();
+        fileId = restTemplateService.send(TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, JobHistory.class).getFileId();
 
         // CHECK EXIST BUILT FILE
         if (fileId < 1) {
@@ -1038,17 +1073,17 @@ public class JobService {
 
             resultModel.setJobNumber(0);
             resultModel.setDuration(0);
-            resultModel.setResultStatus(Constants.RESULT_STATUS_FAIL);
+            resultModel.setResultStatus(RESULT_STATUS_FAIL);
 
             LOGGER.error("### BUILT FILE NOT EXISTED ###");
             return resultModel;
         }
 
         // GET FILE DETAIL FROM DATABASE
-        FileInfo fileInfo = restTemplateService.send(Constants.TARGET_COMMON_API, REQ_FILE_URL + "/" + fileId, HttpMethod.GET, null, FileInfo.class);
+        FileInfo fileInfo = restTemplateService.send(TARGET_COMMON_API, REQ_FILE_URL + "/" + fileId, HttpMethod.GET, null, FileInfo.class);
 
         // SET DEPLOY_TYPE
-        if (String.valueOf(JobConfig.DeployType.PRD).equals(customJob.getDeployType())) {
+        if (DEPLOY_TYPE_PRD.equals(customJob.getDeployType())) {
             deployType = blueGreenDeployStatus;
         }
 
@@ -1070,7 +1105,7 @@ public class JobService {
             jobNumber = buildWithDetails.getNumber();
             jobDuration = buildWithDetails.getDuration();
 
-            if (Constants.RESULT_STATUS_SUCCESS.equals(resultStatus) && !String.valueOf(JobConfig.DeployType.DEV).equals(deployType)) {
+            if (RESULT_STATUS_SUCCESS.equals(resultStatus) && !DEPLOY_TYPE_DEV.equals(deployType)) {
                 // SET BLUE GREEN DEPLOY STATUS
                 procSetBlueGreenDeployStatus(customJob, blueGreenDeployStatus);
             }
@@ -1086,7 +1121,7 @@ public class JobService {
 
             resultModel.setJobNumber(jobNumber);
             resultModel.setDuration(jobDuration);
-            resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+            resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
         } catch (IOException e) {
             throw new TriggerException("IOException", e);
@@ -1116,9 +1151,14 @@ public class JobService {
     // Set Blue Green Deploy Status
     private void procSetBlueGreenDeployStatus(CustomJob customJob, String blueGreenDeployStatus) {
         // SET PARAM :: UPDATE DEPLOY JOB TO DATABASE
-        String enumGreenDeploy = String.valueOf(JobConfig.BlueGreenDeployStatus.GREEN_DEPLOY);
+        String enumGreenDeploy = GREEN_DEPLOY;
         customJob.setBlueGreenDeployStatus(enumGreenDeploy.equals(blueGreenDeployStatus)
                 ? String.valueOf(JobConfig.BlueGreenDeployStatus.BLUE_DEPLOY) : enumGreenDeploy);
+
+
+        if (REVERT_GREEN_DEPLOY.equals(blueGreenDeployStatus)) {
+            customJob.setBlueGreenDeployStatus(blueGreenDeployStatus);
+        }
 
         // UPDATE DEPLOY JOB TO DATABASE
         procUpdateJobToDb(customJob);
@@ -1134,7 +1174,7 @@ public class JobService {
      */
     CustomJob stopJob(CustomJob customJob) throws IOException {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
         // GET SERVICE INSTANCES DETAIL FROM DATABASE
         // SET CI SERVER URL
@@ -1147,7 +1187,7 @@ public class JobService {
         procCancelQueueItem(ciServer, customJob);
 
         // STOP TRIGGER JOB
-        if (Constants.RESULT_STATUS_FAIL.equals(customJob.getResultStatus())) {
+        if (RESULT_STATUS_FAIL.equals(customJob.getResultStatus())) {
             procStopTriggerJob(ciServer, customJob);
         }
 
@@ -1171,11 +1211,11 @@ public class JobService {
                 if (Objects.equals(aQueueItemList.getId(), queueItemId)) {
                     // CANCEL QUEUE ITEM TO CI SERVER
                     commonService.procGetCiHttpClient(customJob.getCiServerUrl()).post("/queue/cancelItem?id=" + queueItemId, true);
-                    customJob.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+                    customJob.setResultStatus(RESULT_STATUS_SUCCESS);
                 }
             }
         } else {
-            customJob.setResultStatus(Constants.RESULT_STATUS_FAIL);
+            customJob.setResultStatus(RESULT_STATUS_FAIL);
         }
     }
 
@@ -1200,7 +1240,7 @@ public class JobService {
      */
     CustomJob getJobLog(int id, int jobNumber) throws IOException {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
         // GET JOB DETAIL FROM DATABASE
         CustomJob jobDetail = procGetJobDetail((long) id);
@@ -1219,6 +1259,7 @@ public class JobService {
             resultModel.setEstimatedDuration(buildWithDetails.getEstimatedDuration());
             resultModel.setTimeStamp(String.valueOf(buildWithDetails.getTimestamp()));
             resultModel.setIsBuilding(getJobStatus(id, jobNumber).getIsBuilding());
+
         } catch (NullPointerException e) {
             LOGGER.error("NullPointerException :: {}", e);
         } catch (Exception e) {
@@ -1226,7 +1267,7 @@ public class JobService {
         } finally {
             resultModel.setJobGuid(jobGuid);
             resultModel.setJobNumber(jobNumber);
-            resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+            resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
         }
 
         return resultModel;
@@ -1243,7 +1284,7 @@ public class JobService {
      */
     CustomJob getJobStatus(int id, int jobNumber) throws IOException {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
         resultModel.setIsBuilding(String.valueOf(false));
 
         boolean isBuilding = false;
@@ -1288,8 +1329,7 @@ public class JobService {
 
     // Check Last Job Status
     private boolean procCheckLastJobStatus(String lastJobStatus) {
-        return String.valueOf(JobTriggerStatusType.JOB_WORKING).equals(lastJobStatus)
-                || String.valueOf(JobTriggerStatusType.BUILT_FILE_UPLOADING).equals(lastJobStatus);
+        return JOB_WORKING.equals(lastJobStatus) || BUILT_FILE_UPLOADING.equals(lastJobStatus);
     }
 
 
@@ -1322,7 +1362,7 @@ public class JobService {
      */
     CustomJob rearrangeJobOrder(CustomJob customJob) {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
         long requestJobId = customJob.getId();
 
@@ -1443,7 +1483,7 @@ public class JobService {
         /**
          * Rollback job trigger type.
          */
-        ROLLBACK;
+        ROLL_BACK;
     }
 
 
