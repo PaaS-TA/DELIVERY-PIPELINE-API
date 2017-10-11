@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import paasta.delivery.pipeline.api.common.Constants;
 import paasta.delivery.pipeline.api.job.CustomJob;
 
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 
@@ -24,6 +25,7 @@ class DeployJobTemplate {
      * @return the deploy template for java
      * @throws IOException the io exception
      */
+    @NotNull
     String getDeployJobTemplateForJava(CustomJob customJob) throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
         File templateFile;
