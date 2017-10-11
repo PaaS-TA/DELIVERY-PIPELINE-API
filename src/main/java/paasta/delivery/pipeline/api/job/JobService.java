@@ -56,6 +56,7 @@ public class JobService {
     private static final String DEPLOY_TYPE_DEV = String.valueOf(JobConfig.DeployType.DEV);
     private static final String DEPLOY_TYPE_PRD = String.valueOf(JobConfig.DeployType.PRD);
     private static final String REVERT_GREEN_DEPLOY = String.valueOf(JobConfig.BlueGreenDeployStatus.REVERT_GREEN_DEPLOY);
+    private static final String BLUE_DEPLOY = String.valueOf(JobConfig.BlueGreenDeployStatus.BLUE_DEPLOY);
     private static final String GREEN_DEPLOY = String.valueOf(JobConfig.BlueGreenDeployStatus.GREEN_DEPLOY);
     private static final String PREVIOUS_JOB_SUCCESS = String.valueOf(JobTriggerType.PREVIOUS_JOB_SUCCESS);
     private static final String MANUAL_TRIGGER = String.valueOf(JobTriggerType.MANUAL_TRIGGER);
@@ -687,10 +688,11 @@ public class JobService {
 
         String schedulerModifiedPushYn = customJob.getSchedulerModifiedPushYn();
         String blueGreenDeployStatus;
+        long jobHistoryId = customJob.getJobHistoryId();
 
         // GET JOB DETAIL FROM DATABASE
         CustomJob jobDetail = procGetJobDetail(customJob.getId());
-        jobDetail.setJobHistoryId(customJob.getJobHistoryId());
+        jobDetail.setJobHistoryId(jobHistoryId);
 
         if (JOB_TYPE_DEPLOY.equals(jobDetail.getJobType())) {
             blueGreenDeployStatus = customJob.getBlueGreenDeployStatus();
@@ -707,6 +709,13 @@ public class JobService {
 
             // UPDATE DEPLOY JOB TO DATABASE
             procUpdateJobToDb(jobDetail);
+
+            // CHECK ROLL BACK
+            if (jobHistoryId > 0) {
+                jobDetail.setAppName(customJob.getAppName());
+                jobDetail.setDeployTargetOrg(customJob.getDeployTargetOrg());
+                jobDetail.setDeployTargetSpace(customJob.getDeployTargetSpace());
+            }
         }
 
         // CHECK MODIFIED PUSH CALLED FROM SCHEDULER
@@ -1010,7 +1019,9 @@ public class JobService {
         String reqUrl;
         String deployType = DEPLOY_TYPE_DEV;
         String blueGreenDeployStatus = customJob.getBlueGreenDeployStatus();
-        long fileId;
+        long fileId = -1;
+        String buildFilePath = Constants.EMPTY_VALUE;
+        String buildFileName = Constants.EMPTY_VALUE;
 
         // GET BUILD JOB DETAIL FROM DATABASE
         CustomJob buildJobModel = procGetJobDetail(buildJobId);
@@ -1019,9 +1030,14 @@ public class JobService {
         // INSERT JOB HISTORY TO DATABASE
         JobHistory jobHistoryInsertResultModel = procInsertJobHistory(customJob, jobHistory);
 
+        // SET DEPLOY TYPE
+        if (DEPLOY_TYPE_PRD.equals(customJob.getDeployType())) {
+            deployType = blueGreenDeployStatus;
+        }
+
         // CHECK ROLL BACK
         if (jobHistoryId > 0) {
-            // ROLL BACK DEPLOY
+            // DEPLOY ROLL BACK
             String appName = customJob.getAppName();
             String deployTargetOrg = customJob.getDeployTargetOrg();
             String deployTargetSpace = customJob.getDeployTargetSpace();
@@ -1036,6 +1052,11 @@ public class JobService {
                 // GET JOB DETAIL FROM DATABASE
                 CustomJob updateDeployJobModel = procGetJobDetail(customJob.getId());
 
+                // SET DEPLOY TYPE FOR ROLL BACK
+                if (DEPLOY_TYPE_PRD.equals(updateDeployJobModel.getDeployType())) {
+                    deployType = DEPLOY_TYPE_DEV;
+                }
+
                 // SET PARAM :: UPDATE DEPLOY JOB
                 updateDeployJobModel.setAppName(appName);
                 updateDeployJobModel.setDeployTargetOrg(deployTargetOrg);
@@ -1043,8 +1064,16 @@ public class JobService {
                 updateDeployJobModel.setManifestUseYn(customJob.getManifestUseYn());
                 updateDeployJobModel.setManifestScript(customJob.getManifestScript());
 
+                // GET SERVICE INSTANCES DETAIL FROM DATABASE
+                // SET CI SERVER URL
+                updateDeployJobModel.setCiServerUrl(customJob.getCiServerUrl());
+
                 // UPDATE DEPLOY JOB
                 procUpdateDeployJob(updateDeployJobModel);
+
+                // SET APP URL :: CF INFO DETAIL FROM DATABASE
+                customJob.setAppUrl(procSetAppUrl(customJob));
+
             } catch (IOException e) {
                 throw new TriggerException("IOException", e);
             }
@@ -1055,44 +1084,46 @@ public class JobService {
             deployJobModel = procGetJobDetail(customJob.getId());
         }
 
-        reqUrl = REQ_URL + "/" + buildJobId + REQ_HISTORY_URL + "/status/" + Constants.EMPTY_VALUE + "/first";
+        // EXCEPT REVERT GREEN DEPLOY
+        if (!REVERT_GREEN_DEPLOY.equals(deployType)) {
+            reqUrl = REQ_URL + "/" + buildJobId + REQ_HISTORY_URL + "/status/" + Constants.EMPTY_VALUE + "/first";
 
-        // GET BUILT FILE INFO FROM JOB HISTORY
-        // GET JOB HISTORY FROM DATABASE
-        fileId = restTemplateService.send(TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, JobHistory.class).getFileId();
+            // GET BUILT FILE INFO FROM JOB HISTORY
+            // GET JOB HISTORY FROM DATABASE
+            fileId = restTemplateService.send(TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, JobHistory.class).getFileId();
 
-        // CHECK EXIST BUILT FILE
-        if (fileId < 1) {
-            jobHistoryInsertResultModel.setJobNumber(0);
-            jobHistoryInsertResultModel.setStatus(String.valueOf(JobTriggerStatusType.FAILURE));
-            jobHistoryInsertResultModel.setDuration(0);
-            jobHistoryInsertResultModel.setFileId(0);
+            // CHECK EXIST BUILT FILE
+            if (fileId < 1) {
+                jobHistoryInsertResultModel.setJobNumber(0);
+                jobHistoryInsertResultModel.setStatus(String.valueOf(JobTriggerStatusType.FAILURE));
+                jobHistoryInsertResultModel.setDuration(0);
+                jobHistoryInsertResultModel.setFileId(0);
 
-            // UPDATE DEPLOY JOB HISTORY TO DATABASE
-            procUpdateJobHistoryToDb(jobHistoryInsertResultModel);
+                // UPDATE DEPLOY JOB HISTORY TO DATABASE
+                procUpdateJobHistoryToDb(jobHistoryInsertResultModel);
 
-            resultModel.setJobNumber(0);
-            resultModel.setDuration(0);
-            resultModel.setResultStatus(RESULT_STATUS_FAIL);
+                resultModel.setJobNumber(0);
+                resultModel.setDuration(0);
+                resultModel.setResultStatus(RESULT_STATUS_FAIL);
 
-            LOGGER.error("### BUILT FILE NOT EXISTED ###");
-            return resultModel;
+                LOGGER.error("### BUILT FILE NOT EXISTED ###");
+                return resultModel;
+            }
+
+            // GET FILE DETAIL FROM DATABASE
+            FileInfo fileInfo = restTemplateService.send(TARGET_COMMON_API, REQ_FILE_URL + "/" + fileId, HttpMethod.GET, null, FileInfo.class);
+
+            buildFilePath = fileInfo.getFileUrl();
+            buildFileName = fileInfo.getOriginalFileName();
         }
 
-        // GET FILE DETAIL FROM DATABASE
-        FileInfo fileInfo = restTemplateService.send(TARGET_COMMON_API, REQ_FILE_URL + "/" + fileId, HttpMethod.GET, null, FileInfo.class);
-
-        // SET DEPLOY_TYPE
-        if (DEPLOY_TYPE_PRD.equals(customJob.getDeployType())) {
-            deployType = blueGreenDeployStatus;
-        }
-
+        // SET DEPLOY PARAM FOR CI SERVER
         Map<String, String> paramMap = new HashMap<>();
         paramMap.put("APP_NAME", deployJobModel.getAppName());
         paramMap.put("ORG_NAME", deployJobModel.getDeployTargetOrg());
         paramMap.put("SPACE_NAME", deployJobModel.getDeployTargetSpace());
-        paramMap.put("BUILD_FILE_PATH", fileInfo.getFileUrl());
-        paramMap.put("BUILD_FILE_NAME", fileInfo.getOriginalFileName());
+        paramMap.put("BUILD_FILE_PATH", buildFilePath);
+        paramMap.put("BUILD_FILE_NAME", buildFileName);
         paramMap.put("BUILD_PACK_NAME", procSetBuildPackName(buildJobModel));
         paramMap.put("DEPLOY_TYPE", deployType);
 
@@ -1105,9 +1136,18 @@ public class JobService {
             jobNumber = buildWithDetails.getNumber();
             jobDuration = buildWithDetails.getDuration();
 
+            // CHECK ROLL BACK
+            if (jobHistoryId > 0) {
+                deployType = DEPLOY_TYPE_PRD;
+                blueGreenDeployStatus = BLUE_DEPLOY;
+            }
+
             if (RESULT_STATUS_SUCCESS.equals(resultStatus) && !DEPLOY_TYPE_DEV.equals(deployType)) {
                 // SET BLUE GREEN DEPLOY STATUS
                 procSetBlueGreenDeployStatus(customJob, blueGreenDeployStatus);
+
+                // SET RESULT STATUS FOR PRD DEPLOY
+                resultStatus = blueGreenDeployStatus + "_" + resultStatus;
             }
 
             // SET PARAM :: UPDATE DEPLOY JOB HISTORY TO DATABASE
@@ -1152,9 +1192,7 @@ public class JobService {
     private void procSetBlueGreenDeployStatus(CustomJob customJob, String blueGreenDeployStatus) {
         // SET PARAM :: UPDATE DEPLOY JOB TO DATABASE
         String enumGreenDeploy = GREEN_DEPLOY;
-        customJob.setBlueGreenDeployStatus(enumGreenDeploy.equals(blueGreenDeployStatus)
-                ? String.valueOf(JobConfig.BlueGreenDeployStatus.BLUE_DEPLOY) : enumGreenDeploy);
-
+        customJob.setBlueGreenDeployStatus(enumGreenDeploy.equals(blueGreenDeployStatus) ? BLUE_DEPLOY : enumGreenDeploy);
 
         if (REVERT_GREEN_DEPLOY.equals(blueGreenDeployStatus)) {
             customJob.setBlueGreenDeployStatus(blueGreenDeployStatus);
