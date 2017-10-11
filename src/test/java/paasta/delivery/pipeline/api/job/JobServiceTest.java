@@ -168,6 +168,7 @@ public class JobServiceTest {
         gTestJobDetailModel.setRepositoryCommitRevision(REPOSITORY_COMMIT_REVISION);
         gTestJobDetailModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
 
+        gTestDeployJobDetailModel.setServiceInstancesId(SERVICE_INSTANCES_ID);
         gTestDeployJobDetailModel.setAppName(APP_NAME);
         gTestDeployJobDetailModel.setDeployTargetOrg(ORG_NAME);
         gTestDeployJobDetailModel.setDeployTargetSpace(SPACE_NAME);
@@ -1942,6 +1943,9 @@ public class JobServiceTest {
 
         gTestJobModel.setId(JOB_ID);
         gTestJobModel.setJobHistoryId(jobHistoryId);
+        gTestJobModel.setAppName(APP_NAME);
+        gTestJobModel.setDeployTargetOrg(ORG_NAME);
+        gTestJobModel.setDeployTargetSpace(SPACE_NAME);
 
         gTestJobDetailModel.setId(deployDetailJobId);
         gTestJobDetailModel.setJobType(String.valueOf(JobService.JobType.DEPLOY));
@@ -1980,6 +1984,8 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL, HttpMethod.PUT, gTestJobDetailModel, CustomJob.class)).thenReturn(gTestResultJobModel);
         // GET DEPLOY JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + deployDetailJobId, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestDeployJobDetailModel);
+        // SET APP URL :: CF INFO DETAIL FROM DATABASE
+        when(cfInfoService.getCfInfo(gTestJobDetailModel)).thenReturn(testCfInfoModel);
         // GET JOB HISTORY FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, JobHistory.class)).thenReturn(gTestJobHistoryModel);
         // GET FILE DETAIL FROM DATABASE
@@ -2007,7 +2013,7 @@ public class JobServiceTest {
         assertEquals(1, gTestResultJobHistoryModel.getJobNumber());
         assertEquals(0, gTestResultJobHistoryModel.getPreviousJobNumber());
         assertEquals(0, gTestResultJobHistoryModel.getDuration());
-        assertEquals(Constants.RESULT_STATUS_SUCCESS, gTestResultJobHistoryModel.getStatus());
+        assertEquals(JobConfig.BlueGreenDeployStatus.BLUE_DEPLOY + "_" + Constants.RESULT_STATUS_SUCCESS, gTestResultJobHistoryModel.getStatus());
         assertEquals(USER_ID, gTestResultJobHistoryModel.getUserId());
         assertEquals(null, gTestResultJobHistoryModel.getCreated());
         assertEquals(null, gTestResultJobHistoryModel.getLastModified());
