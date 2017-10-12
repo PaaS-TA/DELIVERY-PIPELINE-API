@@ -24,9 +24,21 @@ class TestJobTemplate extends JobCommonTemplate {
      */
     String getTestJobTemplateForJava(CustomJob customJob) throws IOException {
         String loadedJobTemplate = getCommonTemplateForBuildTestJobForJava(customJob);
+        String inspectionProjectName = customJob.getInspectionProjectName();
+        String inspectionProjectKey = customJob.getInspectionProjectKey();
 
-        loadedJobTemplate = loadedJobTemplate.replace("@INSPECTION_PROJECT_NAME", customJob.getInspectionProjectName());
-        loadedJobTemplate = loadedJobTemplate.replace("@INSPECTION_PROJECT_KEY", customJob.getInspectionProjectKey());
+        // FOR UPDATE TEST JOB
+        if (null == inspectionProjectName) {
+            inspectionProjectName = "";
+        }
+
+        // FOR UPDATE TEST JOB
+        if (null == inspectionProjectKey) {
+            inspectionProjectKey = "";
+        }
+
+        loadedJobTemplate = loadedJobTemplate.replace("@INSPECTION_PROJECT_NAME", inspectionProjectName);
+        loadedJobTemplate = loadedJobTemplate.replace("@INSPECTION_PROJECT_KEY", inspectionProjectKey);
 
         loadedJobTemplate = loadedJobTemplate.replace("@SONAR_PLUGIN_VERSION", Constants.PluginConfig.SONAR_PLUGIN_VERSION.getValue());
         loadedJobTemplate = loadedJobTemplate.replace("@SONAR_NAME", Constants.PluginConfig.SONAR_NAME.getValue());
