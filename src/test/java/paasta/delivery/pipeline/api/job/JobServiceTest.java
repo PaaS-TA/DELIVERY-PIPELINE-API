@@ -17,9 +17,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringRunner;
+import paasta.delivery.pipeline.api.cf.info.CfInfo;
 import paasta.delivery.pipeline.api.cf.info.CfInfoService;
 import paasta.delivery.pipeline.api.common.*;
 import paasta.delivery.pipeline.api.credential.CredentialsService;
+import paasta.delivery.pipeline.api.inspection.InspectionProject;
+import paasta.delivery.pipeline.api.inspection.InspectionProjectService;
 import paasta.delivery.pipeline.api.job.config.JobConfig;
 import paasta.delivery.pipeline.api.job.template.JobTemplateService;
 import paasta.delivery.pipeline.api.repository.RepositoryService;
@@ -58,8 +61,9 @@ public class JobServiceTest {
     private static final long JOB_HISTORY_ID = 5L;
     private static final int JOB_NUMBER = 1;
     private static final String USER_ID = "test-user-id";
-    private static final String JOB_GUID = "test-job-" + UUID.randomUUID().toString();
+    private static final String PIPELINE_NAME = "test-pipeline-name";
     private static final String JOB_NAME = "test-job-name";
+    private static final String JOB_GUID = "test-job-" + UUID.randomUUID().toString();
     private static final String JOB_XML = "test-job-xml";
     private static final String REPOSITORY_ID = "test-repository-id";
     private static final String REPOSITORY_ACCOUNT_ID = "test-repository-account-id";
@@ -75,6 +79,9 @@ public class JobServiceTest {
     private static final String FILE_URL = "test-file-url";
     private static final String ORIGINAL_FILE_NAME = "test-original-file-name";
     private static final String BUILDER_LANGUAGE = "java_buildpack_offline";
+    private static final String INSPECTION_PROJECT_NAME = "test-inspection-project-name";
+    private static final String INSPECTION_PROJECT_KEY = "test-inspection-project-key";
+    private static final String SONAR_KEY = "test-sonar-key";
 
     private static CustomJob gTestJobModel = null;
     private static CustomJob gTestJobDetailModel = null;
@@ -83,7 +90,9 @@ public class JobServiceTest {
     private static JobHistory gTestJobHistoryModel = null;
     private static JobHistory gTestResultJobHistoryModel = null;
     private static ServiceInstances gTestServiceInstancesModel = null;
-    private static FileInfo gTestFileInfo = null;
+    private static FileInfo gTestFileInfoModel = null;
+    private static InspectionProject gTestInspectionProjectModel = null;
+    private static InspectionProject gTestResultInspectionProjectModel = null;
     private static List<Map<String, Object>> gTestResultList = null;
 
 
@@ -107,6 +116,9 @@ public class JobServiceTest {
 
     @Mock
     private CfInfoService cfInfoService;
+
+    @Mock
+    private InspectionProjectService inspectionProjectService;
 
     @MockBean
     private JenkinsServer ciServer;
@@ -152,7 +164,9 @@ public class JobServiceTest {
         gTestJobHistoryModel = new JobHistory();
         gTestResultJobHistoryModel = new JobHistory();
         gTestServiceInstancesModel = new ServiceInstances();
-        gTestFileInfo = new FileInfo();
+        gTestFileInfoModel = new FileInfo();
+        gTestInspectionProjectModel = new InspectionProject();
+        gTestResultInspectionProjectModel = new InspectionProject();
         gTestResultList = new ArrayList<>();
 
         gTestJobModel.setServiceInstancesId(SERVICE_INSTANCES_ID);
@@ -188,14 +202,16 @@ public class JobServiceTest {
         gTestResultJobModel.setRepositoryAccountPassword(REPOSITORY_ACCOUNT_PASSWORD);
         gTestResultJobModel.setRepositoryCommitRevision(REPOSITORY_COMMIT_REVISON);
         gTestResultJobModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        gTestResultJobModel.setInspectionProjectId(0);
+        gTestResultJobModel.setInspectionProjectKey(INSPECTION_PROJECT_KEY);
 
         gTestResultJobModel.setJobTrigger(String.valueOf(JobService.JobTriggerType.PREVIOUS_JOB_SUCCESS));
         gTestResultJobModel.setDeployType(String.valueOf(JobConfig.DeployType.DEV));
         gTestResultJobModel.setBlueGreenDeployStatus(String.valueOf(JobConfig.BlueGreenDeployStatus.GREEN_DEPLOY));
         gTestResultJobModel.setManifestScript("");
-        gTestResultJobModel.setInspectionProjectId("");
-        gTestResultJobModel.setInspectionProfileId("");
-        gTestResultJobModel.setInspectionGateId("");
+        gTestResultJobModel.setInspectionProjectId(0);
+        gTestResultJobModel.setInspectionProfileId(0);
+        gTestResultJobModel.setInspectionGateId(0);
         gTestResultJobModel.setCreated("");
         gTestResultJobModel.setLastModified("");
         gTestResultJobModel.setBuildJobName("");
@@ -223,8 +239,19 @@ public class JobServiceTest {
 
         gTestServiceInstancesModel.setCiServerUrl(CI_SERVER_URL);
 
-        gTestFileInfo.setFileUrl(FILE_URL);
-        gTestFileInfo.setOriginalFileName(ORIGINAL_FILE_NAME);
+        gTestFileInfoModel.setFileUrl(FILE_URL);
+        gTestFileInfoModel.setOriginalFileName(ORIGINAL_FILE_NAME);
+
+        gTestInspectionProjectModel.setServiceInstancesId(SERVICE_INSTANCES_ID);
+        gTestInspectionProjectModel.setPipelineId((int) PIPELINE_ID);
+        gTestInspectionProjectModel.setJobId(0L);
+        gTestInspectionProjectModel.setName(PIPELINE_NAME + "_" + JOB_NAME);
+        gTestInspectionProjectModel.setQualityProfileId(1);
+        gTestInspectionProjectModel.setQualityGateId(1);
+
+        gTestResultInspectionProjectModel.setId(1);
+        gTestResultInspectionProjectModel.setName(INSPECTION_PROJECT_NAME);
+        gTestResultInspectionProjectModel.setSonarKey(SONAR_KEY);
 
         gTestResultMap.put("id", JOB_ID_IN_MAP);
         gTestResultMap.put("serviceInstancesId", SERVICE_INSTANCES_ID);
@@ -1153,6 +1180,9 @@ public class JobServiceTest {
         gTestJobModel.setJobType(String.valueOf(JobService.JobType.TEST));
         gTestJobModel.setBuildJobId(JOB_ID);
         gTestJobModel.setJobName(JOB_NAME);
+        gTestJobModel.setPipelineName(PIPELINE_NAME);
+        gTestJobModel.setInspectionProfileId(1);
+        gTestJobModel.setInspectionGateId(1);
 
         gTestJobDetailModel.setBuilderType(String.valueOf(JobConfig.BuilderType.GRADLE));
 
@@ -1163,6 +1193,8 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+        // CREATE INSPECTION PROJECT TO INSPECTION API
+        when(inspectionProjectService.createProject(gTestJobModel)).thenReturn(gTestResultInspectionProjectModel);
         // GET JOB XML FROM TEMPLATE FILE
         when(jobTemplateService.getTestJobTemplate(gTestJobModel)).thenReturn(JOB_XML);
         // CREATE TEST JOB TO CI SERVER
@@ -1182,6 +1214,8 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+        // UPDATE INSPECTION PROJECT TO INSPECTION API
+        when(inspectionProjectService.updateProject(gTestJobModel)).thenReturn(gTestResultInspectionProjectModel);
 
 
         // TEST
@@ -1223,6 +1257,8 @@ public class JobServiceTest {
         when(repositoryService.getRepositoryInfo(String.valueOf(JOB_ID))).thenReturn(gTestResultJobModel);
         // UPDATE TEST JOB TO DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL, HttpMethod.PUT, gTestJobModel, CustomJob.class)).thenReturn(gTestResultJobModel);
+        // UPDATE INSPECTION PROJECT TO INSPECTION API
+        when(inspectionProjectService.updateProject(gTestJobModel)).thenReturn(gTestResultInspectionProjectModel);
 
 
         // TEST
@@ -1268,6 +1304,8 @@ public class JobServiceTest {
         when(repositoryService.getRepositoryInfo(String.valueOf(JOB_ID))).thenReturn(gTestResultJobModel);
         // UPDATE TEST JOB TO DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL, HttpMethod.PUT, gTestJobModel, CustomJob.class)).thenReturn(gTestResultJobModel);
+        // UPDATE INSPECTION PROJECT TO INSPECTION API
+        when(inspectionProjectService.updateProject(gTestJobModel)).thenReturn(gTestResultInspectionProjectModel);
 
 
         // TEST
@@ -1489,7 +1527,8 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
-
+        // DELETE INSPECTION PROJECT TO INSPECTION API
+        when(inspectionProjectService.deleteProject(gTestResultJobModel)).thenReturn(gTestResultInspectionProjectModel);
 
         // TEST
         CustomJob resultModel = jobService.deleteJob(String.valueOf(JOB_ID));
@@ -1550,6 +1589,8 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+        // DELETE INSPECTION PROJECT TO INSPECTION API
+        when(inspectionProjectService.deleteProject(gTestResultJobModel)).thenReturn(gTestResultInspectionProjectModel);
 
 
         // TEST
@@ -1601,6 +1642,8 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+        // DELETE INSPECTION PROJECT TO INSPECTION API
+        when(inspectionProjectService.deleteProject(gTestResultJobModel)).thenReturn(gTestResultInspectionProjectModel);
 
 
         // TEST
@@ -1652,6 +1695,8 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+        // DELETE INSPECTION PROJECT TO INSPECTION API
+        when(inspectionProjectService.deleteProject(gTestResultJobModel)).thenReturn(gTestResultInspectionProjectModel);
 
 
         // TEST
@@ -1886,7 +1931,7 @@ public class JobServiceTest {
         // GET JOB HISTORY FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, JobHistory.class)).thenReturn(gTestJobHistoryModel);
         // GET FILE DETAIL FROM DATABASE
-        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_FILE_URL + "/" + FILE_ID, HttpMethod.GET, null, FileInfo.class)).thenReturn(gTestFileInfo);
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_FILE_URL + "/" + FILE_ID, HttpMethod.GET, null, FileInfo.class)).thenReturn(gTestFileInfoModel);
         // TRIGGER DEPLOY JOB TO CI SERVER
         when(commonService.getCiTriggerHelper(CI_SERVER_URL)).thenReturn(ciTriggerHelper);
         // TRIGGER DEPLOY JOB TO CI SERVER
@@ -1989,7 +2034,7 @@ public class JobServiceTest {
         // GET JOB HISTORY FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, JobHistory.class)).thenReturn(gTestJobHistoryModel);
         // GET FILE DETAIL FROM DATABASE
-        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_FILE_URL + "/" + FILE_ID, HttpMethod.GET, null, FileInfo.class)).thenReturn(gTestFileInfo);
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_FILE_URL + "/" + FILE_ID, HttpMethod.GET, null, FileInfo.class)).thenReturn(gTestFileInfoModel);
         // TRIGGER DEPLOY JOB TO CI SERVER
         when(commonService.getCiTriggerHelper(CI_SERVER_URL)).thenReturn(ciTriggerHelper);
         // TRIGGER DEPLOY JOB TO CI SERVER
