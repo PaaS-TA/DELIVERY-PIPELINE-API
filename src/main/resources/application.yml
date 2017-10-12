@@ -26,6 +26,12 @@ commonApi:
     id: COMMOM-API-AUTHORIZATION-ID
     password: COMMOM-API-AUTHORIZATION-PASSWORD
 
+inspectionApi:
+  url: INSPECTION-API-URL
+  authorization:
+    id: INSPECTION-API-AUTHORIZATION-ID
+    password: INSPECTION-API-AUTHORIZATION-PASSWORD
+
 binaryStorageApi:
   url: BINARY-STORAGE-API-URL
   authorization:
@@ -66,6 +72,12 @@ commonApi:
   authorization:
     id: COMMOM-API-AUTHORIZATION-ID
     password: COMMOM-API-AUTHORIZATION-PASSWORD
+
+inspectionApi:
+  url: INSPECTION-API-URL
+  authorization:
+    id: INSPECTION-API-AUTHORIZATION-ID
+    password: INSPECTION-API-AUTHORIZATION-PASSWORD
 
 binaryStorageApi:
   url: BINARY-STORAGE-API-URL
