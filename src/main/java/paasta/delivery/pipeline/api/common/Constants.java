@@ -14,6 +14,7 @@ public class Constants {
     public static final String RESULT_STATUS_FAIL = "FAIL";
 
     public static final String TARGET_COMMON_API = "commonApi";
+    public static final String TARGET_INSPECTION_API = "inspectionApi";
     public static final String TARGET_BINARY_STORAGE_API = "binaryStorageApi";
 
     public static final String EMPTY_VALUE = "EMPTY_VALUE";

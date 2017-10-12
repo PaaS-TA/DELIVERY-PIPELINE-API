@@ -33,6 +33,9 @@ public class RestTemplateService {
     private final String commonApiUrl;
     private final String commonApiAuthorizationId;
     private final String commonApiAuthorizationPassword;
+    private final String inspectionApiUrl;
+    private final String inspectionApiAuthorizationId;
+    private final String inspectionApiAuthorizationPassword;
     private final String binaryStorageApiUrl;
     private final String binaryStorageApiAuthorizationId;
     private final String binaryStorageApiAuthorizationPassword;
@@ -56,6 +59,9 @@ public class RestTemplateService {
         commonApiUrl = propertyService.getCommonApiUrl();
         commonApiAuthorizationId = propertyService.getCommonApiAuthorizationId();
         commonApiAuthorizationPassword = propertyService.getCommonApiAuthorizationPassword();
+        inspectionApiUrl = propertyService.getInspectionApiUrl();
+        inspectionApiAuthorizationId = propertyService.getInspectionApiAuthorizationId();
+        inspectionApiAuthorizationPassword = propertyService.getInspectionApiAuthorizationPassword();
         binaryStorageApiUrl = propertyService.getBinaryStorageApiUrl();
         binaryStorageApiAuthorizationId = propertyService.getBinaryStorageApiAuthorizationId();
         binaryStorageApiAuthorizationPassword = propertyService.getBinaryStorageApiAuthorizationPassword();
@@ -190,6 +196,12 @@ public class RestTemplateService {
         if (Constants.TARGET_COMMON_API.equals(reqApi)) {
             apiUrl = commonApiUrl;
             authorization = commonApiAuthorizationId + ":" + commonApiAuthorizationPassword;
+        }
+
+        // INSPECTION API
+        if (Constants.TARGET_INSPECTION_API.equals(reqApi)) {
+            apiUrl = inspectionApiUrl;
+            authorization = inspectionApiAuthorizationId + ":" + inspectionApiAuthorizationPassword;
         }
 
         //  BINARY STORAGE API

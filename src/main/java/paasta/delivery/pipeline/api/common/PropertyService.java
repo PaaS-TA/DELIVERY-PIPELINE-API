@@ -54,6 +54,16 @@ public class PropertyService {
     @Value("${commonApi.authorization.password}")
     private String commonApiAuthorizationPassword;
 
+    // INSPECTION API
+    @Value("${inspectionApi.url}")
+    private String inspectionApiUrl;
+
+    @Value("${inspectionApi.authorization.id}")
+    private String inspectionApiAuthorizationId;
+
+    @Value("${inspectionApi.authorization.password}")
+    private String inspectionApiAuthorizationPassword;
+
     //  BINARY STORAGE API
     @Value("${binaryStorageApi.url}")
     private String binaryStorageApiUrl;
@@ -182,6 +192,36 @@ public class PropertyService {
      */
     String getCommonApiAuthorizationPassword() {
         return commonApiAuthorizationPassword;
+    }
+
+
+    /**
+     * Gets inspection api url.
+     *
+     * @return the inspection api url
+     */
+    public String getInspectionApiUrl() {
+        return inspectionApiUrl;
+    }
+
+
+    /**
+     * Gets inspection api authorization id.
+     *
+     * @return the inspection api authorization id
+     */
+    public String getInspectionApiAuthorizationId() {
+        return inspectionApiAuthorizationId;
+    }
+
+
+    /**
+     * Gets inspection api authorization password.
+     *
+     * @return the inspection api authorization password
+     */
+    public String getInspectionApiAuthorizationPassword() {
+        return inspectionApiAuthorizationPassword;
     }
 
 
