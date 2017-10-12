@@ -12,6 +12,8 @@ import paasta.delivery.pipeline.api.cf.info.CfInfoService;
 import paasta.delivery.pipeline.api.common.*;
 import paasta.delivery.pipeline.api.credential.CredentialsService;
 import paasta.delivery.pipeline.api.exception.TriggerException;
+import paasta.delivery.pipeline.api.inspection.InspectionProject;
+import paasta.delivery.pipeline.api.inspection.InspectionProjectService;
 import paasta.delivery.pipeline.api.job.config.JobConfig;
 import paasta.delivery.pipeline.api.job.template.JobTemplateService;
 import paasta.delivery.pipeline.api.repository.RepositoryService;
@@ -70,18 +72,20 @@ public class JobService {
     private final CredentialsService credentialsService;
     private final RepositoryService repositoryService;
     private final CfInfoService cfInfoService;
+    private final InspectionProjectService inspectionProjectService;
 
 
     /**
      * Instantiates a new Job service.
      *
-     * @param commonService       the common service
-     * @param restTemplateService the rest template service
-     * @param jobTemplateService  the job template service
-     * @param jobBuiltFileService the job built file service
-     * @param credentialsService  the credentials service
-     * @param repositoryService   the repository service
-     * @param cfInfoService       the cf info service
+     * @param commonService            the common service
+     * @param restTemplateService      the rest template service
+     * @param jobTemplateService       the job template service
+     * @param jobBuiltFileService      the job built file service
+     * @param credentialsService       the credentials service
+     * @param repositoryService        the repository service
+     * @param cfInfoService            the cf info service
+     * @param inspectionProjectService the inspection project service
      */
     @Autowired
     public JobService(CommonService commonService,
@@ -89,7 +93,9 @@ public class JobService {
                       JobTemplateService jobTemplateService,
                       JobBuiltFileService jobBuiltFileService,
                       CredentialsService credentialsService,
-                      RepositoryService repositoryService, CfInfoService cfInfoService) {
+                      RepositoryService repositoryService,
+                      CfInfoService cfInfoService,
+                      InspectionProjectService inspectionProjectService) {
         this.commonService = commonService;
         this.restTemplateService = restTemplateService;
         this.jobTemplateService = jobTemplateService;
@@ -97,6 +103,7 @@ public class JobService {
         this.credentialsService = credentialsService;
         this.repositoryService = repositoryService;
         this.cfInfoService = cfInfoService;
+        this.inspectionProjectService = inspectionProjectService;
     }
 
 
@@ -453,25 +460,13 @@ public class JobService {
         customJob.setRepositoryBranch(buildJobDetail.getRepositoryBranch());
         customJob.setRepositoryCommitRevision(buildJobDetail.getRepositoryCommitRevision());
 
-        // TODO :: CALL CREATE INSPECTION PROJECT
-        // TODO :: RETURN INSPECTION PROJECT ID
-//        CustomJob resultCreatedInspectionModel = new CustomJob();
-//        String inspectionProjectId = resultCreatedInspectionModel.getInspectionProjectId();
+        // CREATE INSPECTION PROJECT TO INSPECTION API
+        InspectionProject resultInspectionProject = inspectionProjectService.createProject(customJob);
 
-        // TODO :: CALL GET INSPECTION INFO
-//        CustomJob resultDetailInspectionModel = new CustomJob();
-        // TODO :: RETURN INSPECTION PROJECT INFO
-        // TODO :: SET INSPECTION PROJECT NAME, INSPECTION PROJECT KEY
-//        String inspectionProjectName = resultDetailInspectionModel.getInspectionProjectName();
-//        String inspectionProjectKey = resultDetailInspectionModel.getInspectionProjectKey();
-
-        // TEMP
-        String inspectionProjectName = "rex-test";
-        String inspectionProjectKey = "rex-test-key";
-
-        customJob.setInspectionProjectName(inspectionProjectName);
-        customJob.setInspectionProjectKey(inspectionProjectKey);
-
+        // SET PARAM :: INSPECTION VARIABLES
+        customJob.setInspectionProjectId(resultInspectionProject.getId());
+        customJob.setInspectionProjectName(resultInspectionProject.getName());
+        customJob.setInspectionProjectKey(resultInspectionProject.getSonarKey());
 
         // CREATE TEST JOB TO CI SERVER
         commonService.procGetCiServer(customJob.getCiServerUrl()).createJob(jobGuid, jobTemplateService.getTestJobTemplate(customJob), true);
@@ -495,6 +490,12 @@ public class JobService {
         // UPDATE TEST JOB TO DATABASE
         procUpdateJobToDb(resultModel);
 
+        // SET PARAM : UPDATE INSPECTION PROJECT TO INSPECTION API
+        customJob.setId(resultModel.getId());
+
+        // UPDATE INSPECTION PROJECT TO INSPECTION API
+        inspectionProjectService.updateProject(customJob);
+
         resultModel.setJobGuid(jobGuid);
         return resultModel;
     }
@@ -506,27 +507,8 @@ public class JobService {
         resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
         long jobId = customJob.getId();
+        long pipelineId = customJob.getPipelineId();
         String reqJobName = customJob.getJobName();
-
-        // TODO :: CALL CREATE INSPECTION PROJECT
-        // TODO :: RETURN INSPECTION PROJECT ID
-//        CustomJob resultCreatedInspectionModel = new CustomJob();
-//        String inspectionProjectId = resultCreatedInspectionModel.getInspectionProjectId();
-
-        // TODO :: CALL GET INSPECTION INFO
-//        CustomJob resultDetailInspectionModel = new CustomJob();
-        // TODO :: RETURN INSPECTION PROJECT INFO
-        // TODO :: SET INSPECTION PROJECT NAME, INSPECTION PROJECT KEY
-//        String inspectionProjectName = resultDetailInspectionModel.getInspectionProjectName();
-//        String inspectionProjectKey = resultDetailInspectionModel.getInspectionProjectKey();
-
-        // TEMP
-        String inspectionProjectName = "rex-test";
-        String inspectionProjectKey = "rex-test-key";
-
-        customJob.setInspectionProjectName(inspectionProjectName);
-        customJob.setInspectionProjectKey(inspectionProjectKey);
-
 
         // UPDATE TEST JOB TO CI SERVER
         commonService.procGetCiServer(customJob.getCiServerUrl()).updateJob(customJob.getJobGuid(), jobTemplateService.getTestJobTemplate(customJob), true);
@@ -536,7 +518,7 @@ public class JobService {
 
         // SET JOB NAME :: CHECK FROM DATABASE
         if (!jobDetail.getJobName().equals(reqJobName)) {
-            customJob.setJobName(procSetJobName(customJob.getPipelineId(), reqJobName));
+            customJob.setJobName(procSetJobName(pipelineId, reqJobName));
         }
 
         // GET REPOSITORY COMMIT REVISION
@@ -544,12 +526,23 @@ public class JobService {
 
         // SET PARAM :: UPDATE JOB DETAIL
         customJob.setRepositoryCommitRevision(repositoryInfoModel.getRepositoryCommitRevision());
+        customJob.setInspectionProjectId(jobDetail.getInspectionProjectId());
+        customJob.setInspectionProjectKey(jobDetail.getInspectionProjectKey());
+        customJob.setInspectionProfileId(jobDetail.getInspectionProfileId());
+        customJob.setInspectionGateId(jobDetail.getInspectionGateId());
 
         // SET REPOSITORY ACCOUNT PASSWORD BY AES256
         customJob.setRepositoryAccountPassword(commonService.setPasswordByAES256(Constants.AES256Type.ENCODE, customJob.getRepositoryAccountPassword()));
 
         // UPDATE TEST JOB TO DATABASE
         resultModel = procUpdateJobToDb(customJob);
+
+        // SET PARAM : UPDATE INSPECTION PROJECT TO INSPECTION API
+        customJob.setInspectionProjectId(jobDetail.getInspectionProjectId());
+        customJob.setInspectionProjectName(customJob.getPipelineName() + "_" + customJob.getJobName());
+
+        // UPDATE INSPECTION PROJECT TO INSPECTION API
+        inspectionProjectService.updateProject(customJob);
 
         return resultModel;
     }
@@ -670,6 +663,11 @@ public class JobService {
 
         // SET JOB ORDER :: SET TO DATABASE
         procSetJobOrder(jobDetail, OperationType.DECREASE);
+
+        if (JOB_TYPE_TEST.equals(jobDetail.getJobType())) {
+            // DELETE INSPECTION PROJECT TO INSPECTION API
+            inspectionProjectService.deleteProject(jobDetail);
+        }
 
         return resultModel;
     }

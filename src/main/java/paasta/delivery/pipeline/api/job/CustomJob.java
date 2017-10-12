@@ -39,9 +39,10 @@ public class CustomJob {
     private String deployTargetSpace;
     private String manifestUseYn;
     private String manifestScript;
-    private String inspectionProjectId;
-    private String inspectionProfileId;
-    private String inspectionGateId;
+    private long inspectionProjectId;
+    private String inspectionProjectKey;
+    private int inspectionProfileId;
+    private int inspectionGateId;
     private String userId;
     private String created;
     private String lastModified;
@@ -71,7 +72,7 @@ public class CustomJob {
     private String newWorkGroupYn;
     private String triggerType;
     private String inspectionProjectName;
-    private String inspectionProjectKey;
+    private String pipelineName;
 
     private int previousJobNumber;
     private String schedulerModifiedPushYn;
@@ -304,27 +305,35 @@ public class CustomJob {
         this.manifestScript = manifestScript;
     }
 
-    public String getInspectionProjectId() {
+    public long getInspectionProjectId() {
         return inspectionProjectId;
     }
 
-    public void setInspectionProjectId(String inspectionProjectId) {
+    public void setInspectionProjectId(long inspectionProjectId) {
         this.inspectionProjectId = inspectionProjectId;
     }
 
-    public String getInspectionProfileId() {
+    public String getInspectionProjectKey() {
+        return inspectionProjectKey;
+    }
+
+    public void setInspectionProjectKey(String inspectionProjectKey) {
+        this.inspectionProjectKey = inspectionProjectKey;
+    }
+
+    public int getInspectionProfileId() {
         return inspectionProfileId;
     }
 
-    public void setInspectionProfileId(String inspectionProfileId) {
+    public void setInspectionProfileId(int inspectionProfileId) {
         this.inspectionProfileId = inspectionProfileId;
     }
 
-    public String getInspectionGateId() {
+    public int getInspectionGateId() {
         return inspectionGateId;
     }
 
-    public void setInspectionGateId(String inspectionGateId) {
+    public void setInspectionGateId(int inspectionGateId) {
         this.inspectionGateId = inspectionGateId;
     }
 
@@ -496,12 +505,12 @@ public class CustomJob {
         this.inspectionProjectName = inspectionProjectName;
     }
 
-    public String getInspectionProjectKey() {
-        return inspectionProjectKey;
+    public String getPipelineName() {
+        return pipelineName;
     }
 
-    public void setInspectionProjectKey(String inspectionProjectKey) {
-        this.inspectionProjectKey = inspectionProjectKey;
+    public void setPipelineName(String pipelineName) {
+        this.pipelineName = pipelineName;
     }
 
     public int getPreviousJobNumber() {
