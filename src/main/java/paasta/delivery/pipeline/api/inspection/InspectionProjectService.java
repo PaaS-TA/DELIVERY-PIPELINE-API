@@ -5,6 +5,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import paasta.delivery.pipeline.api.common.Constants;
 import paasta.delivery.pipeline.api.common.RestTemplateService;
+import paasta.delivery.pipeline.api.job.CustomJob;
 
 /**
  * The type Inspection project service.
@@ -28,33 +29,61 @@ public class InspectionProjectService {
     /**
      * Create project inspection project.
      *
-     * @param project the project
+     * @param customJob the custom job
      * @return the inspection project
      */
-    public InspectionProject createProject(InspectionProject project) {
-        return restTemplateService.send(Constants.TARGET_INSPECTION_API, REQ_URL + "/projectsCreate", HttpMethod.POST, project, InspectionProject.class);
+    public InspectionProject createProject(CustomJob customJob) {
+        InspectionProject inspectionProject = new InspectionProject();
+
+        // SET PARAM :: CREATE INSPECTION PROJECT TO INSPECTION API
+        inspectionProject.setServiceInstancesId(customJob.getServiceInstancesId());
+        inspectionProject.setPipelineId((int) customJob.getPipelineId());
+        inspectionProject.setJobId(0L);
+        inspectionProject.setName(customJob.getPipelineName() + "_" + customJob.getJobName());
+        inspectionProject.setQualityProfileId(customJob.getInspectionProfileId());
+        inspectionProject.setQualityGateId(customJob.getInspectionGateId());
+
+        // CREATE INSPECTION PROJECT TO INSPECTION API
+        return restTemplateService.send(Constants.TARGET_INSPECTION_API, REQ_URL + "/projectsCreate", HttpMethod.POST, inspectionProject, InspectionProject.class);
     }
 
 
     /**
      * Update project inspection project.
      *
-     * @param project the project
+     * @param customJob the custom job
      * @return the inspection project
      */
-    public InspectionProject updateProject(InspectionProject project) {
-        return restTemplateService.send(Constants.TARGET_INSPECTION_API, REQ_URL + "/projectsUpdate", HttpMethod.POST, project, InspectionProject.class);
+    public InspectionProject updateProject(CustomJob customJob) {
+        InspectionProject inspectionProject = new InspectionProject();
+
+        // SET PARAM : UPDATE INSPECTION PROJECT TO INSPECTION API
+        inspectionProject.setId(customJob.getInspectionProjectId());
+        inspectionProject.setServiceInstancesId(customJob.getServiceInstancesId());
+        inspectionProject.setPipelineId((int) customJob.getPipelineId());
+        inspectionProject.setJobId(customJob.getId());
+        inspectionProject.setName(customJob.getInspectionProjectName());
+        inspectionProject.setQualityProfileId(customJob.getInspectionProfileId());
+        inspectionProject.setQualityGateId(customJob.getInspectionGateId());
+
+        return restTemplateService.send(Constants.TARGET_INSPECTION_API, REQ_URL + "/projectsUpdate", HttpMethod.POST, inspectionProject, InspectionProject.class);
     }
 
 
     /**
      * Delete project inspection project.
      *
-     * @param project the project
+     * @param customJob the custom job
      * @return the inspection project
      */
-    public InspectionProject deleteProject(InspectionProject project) {
-        return restTemplateService.send(Constants.TARGET_INSPECTION_API, REQ_URL + "/projectsDelete", HttpMethod.POST, project, InspectionProject.class);
+    public InspectionProject deleteProject(CustomJob customJob) {
+        InspectionProject inspectionProject = new InspectionProject();
+
+        // SET PARAM : DELETE INSPECTION PROJECT TO INSPECTION API
+        inspectionProject.setId(customJob.getInspectionProjectId());
+        inspectionProject.setKey(customJob.getInspectionProjectKey());
+
+        return restTemplateService.send(Constants.TARGET_INSPECTION_API, REQ_URL + "/projectsDelete", HttpMethod.POST, inspectionProject, InspectionProject.class);
     }
 
 }
