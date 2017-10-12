@@ -3,7 +3,7 @@ package paasta.delivery.pipeline.api.job.template;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import paasta.delivery.pipeline.api.cf.info.CfInfoService;
-import paasta.delivery.pipeline.api.common.CfInfo;
+import paasta.delivery.pipeline.api.cf.info.CfInfo;
 import paasta.delivery.pipeline.api.job.CustomJob;
 
 import java.io.IOException;

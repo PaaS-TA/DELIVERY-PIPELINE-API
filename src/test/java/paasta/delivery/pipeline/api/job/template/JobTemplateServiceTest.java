@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import paasta.delivery.pipeline.api.cf.info.CfInfoService;
-import paasta.delivery.pipeline.api.common.CfInfo;
+import paasta.delivery.pipeline.api.cf.info.CfInfo;
 import paasta.delivery.pipeline.api.common.Constants;
 import paasta.delivery.pipeline.api.job.CustomJob;
 import paasta.delivery.pipeline.api.job.config.JobConfig;

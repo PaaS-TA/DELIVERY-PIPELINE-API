@@ -1,4 +1,4 @@
-package paasta.delivery.pipeline.api.common;
+package paasta.delivery.pipeline.api.cf.info;
 
 /**
  * paastaDeliveryPipelineApi

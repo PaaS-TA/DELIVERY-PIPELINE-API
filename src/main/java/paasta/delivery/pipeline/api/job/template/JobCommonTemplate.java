@@ -5,6 +5,7 @@ import paasta.delivery.pipeline.api.common.Constants;
 import paasta.delivery.pipeline.api.job.CustomJob;
 import paasta.delivery.pipeline.api.job.config.JobConfig;
 
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 
@@ -28,6 +29,7 @@ class JobCommonTemplate {
      * @return the common template for build test job for java
      * @throws IOException the io exception
      */
+    @NotNull
     String getCommonTemplateForBuildTestJobForJava(CustomJob customJob) throws IOException {
         String jobType = customJob.getJobType();
         String templateFilePath = JOB_TEMPLATE_URL_STRING.replace("{JOB_TYPE}", "build");

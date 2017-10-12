@@ -3,7 +3,6 @@ package paasta.delivery.pipeline.api.cf.info;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
-import paasta.delivery.pipeline.api.common.CfInfo;
 import paasta.delivery.pipeline.api.common.Constants;
 import paasta.delivery.pipeline.api.common.RestTemplateService;
 import paasta.delivery.pipeline.api.job.CustomJob;
