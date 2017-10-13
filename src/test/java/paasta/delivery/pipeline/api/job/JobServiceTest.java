@@ -91,7 +91,6 @@ public class JobServiceTest {
     private static JobHistory gTestResultJobHistoryModel = null;
     private static ServiceInstances gTestServiceInstancesModel = null;
     private static FileInfo gTestFileInfoModel = null;
-    private static InspectionProject gTestInspectionProjectModel = null;
     private static InspectionProject gTestResultInspectionProjectModel = null;
     private static List<Map<String, Object>> gTestResultList = null;
 
@@ -156,6 +155,7 @@ public class JobServiceTest {
     @Before
     public void setUp() throws Exception {
         Map<String, Object> gTestResultMap = new HashMap<>();
+        InspectionProject gTestInspectionProjectModel = new InspectionProject();
 
         gTestJobModel = new CustomJob();
         gTestJobDetailModel = new CustomJob();
@@ -165,7 +165,6 @@ public class JobServiceTest {
         gTestResultJobHistoryModel = new JobHistory();
         gTestServiceInstancesModel = new ServiceInstances();
         gTestFileInfoModel = new FileInfo();
-        gTestInspectionProjectModel = new InspectionProject();
         gTestResultInspectionProjectModel = new InspectionProject();
         gTestResultList = new ArrayList<>();
 
@@ -203,6 +202,7 @@ public class JobServiceTest {
         gTestResultJobModel.setRepositoryCommitRevision(REPOSITORY_COMMIT_REVISON);
         gTestResultJobModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
         gTestResultJobModel.setInspectionProjectId(0);
+        gTestResultJobModel.setInspectionProjectName(INSPECTION_PROJECT_NAME);
         gTestResultJobModel.setInspectionProjectKey(INSPECTION_PROJECT_KEY);
 
         gTestResultJobModel.setJobTrigger(String.valueOf(JobService.JobTriggerType.PREVIOUS_JOB_SUCCESS));
@@ -1503,7 +1503,7 @@ public class JobServiceTest {
     public void deleteJob_ValidJobId_ReturnModel() throws Exception {
         String reqUrl = REQ_PIPELINES_URL + PIPELINE_ID + REQ_URL;
 
-        gTestJobModel.setJobType(String.valueOf(JobService.JobType.BUILD));
+        gTestResultJobModel.setJobType(String.valueOf(JobService.JobType.TEST));
 
 
         // GET SERVICE INSTANCES DETAIL FROM DATABASE
@@ -1589,8 +1589,6 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
-        // DELETE INSPECTION PROJECT TO INSPECTION API
-        when(inspectionProjectService.deleteProject(gTestResultJobModel)).thenReturn(gTestResultInspectionProjectModel);
 
 
         // TEST
@@ -1642,8 +1640,6 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
-        // DELETE INSPECTION PROJECT TO INSPECTION API
-        when(inspectionProjectService.deleteProject(gTestResultJobModel)).thenReturn(gTestResultInspectionProjectModel);
 
 
         // TEST
@@ -1695,8 +1691,6 @@ public class JobServiceTest {
         when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
-        // DELETE INSPECTION PROJECT TO INSPECTION API
-        when(inspectionProjectService.deleteProject(gTestResultJobModel)).thenReturn(gTestResultInspectionProjectModel);
 
 
         // TEST
@@ -1884,12 +1878,12 @@ public class JobServiceTest {
 
 
     /**
-     * Trigger job deploy valid model return model.
+     * Trigger job deploy dev valid model return model.
      *
      * @throws Exception the exception
      */
     @Test
-    public void triggerJob_DEPLOY_ValidModel_ReturnModel() throws Exception {
+    public void triggerJob_DEPLOY_dev_ValidModel_ReturnModel() throws Exception {
         Map<String, String> testParamMap = new HashMap<>();
         long buildJobId = 10L;
         long deployDetailJobId = 11L;
@@ -1959,6 +1953,77 @@ public class JobServiceTest {
         assertEquals(USER_ID, gTestResultJobHistoryModel.getUserId());
         assertEquals(null, gTestResultJobHistoryModel.getCreated());
         assertEquals(null, gTestResultJobHistoryModel.getLastModified());
+    }
+
+
+    /**
+     * Trigger job deploy prd valid model return model.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void triggerJob_DEPLOY_prd_ValidModel_ReturnModel() throws Exception {
+        Map<String, String> testParamMap = new HashMap<>();
+        long buildJobId = 10L;
+        long deployDetailJobId = 11L;
+        long jobHistoryId = 0L;
+        String reqUrl = REQ_URL + "/" + buildJobId + REQ_HISTORY_URL + "/status/" + Constants.EMPTY_VALUE + "/first";
+
+        testParamMap.put("APP_NAME", APP_NAME);
+        testParamMap.put("ORG_NAME", ORG_NAME);
+        testParamMap.put("SPACE_NAME", SPACE_NAME);
+        testParamMap.put("BUILD_FILE_PATH", FILE_URL);
+        testParamMap.put("BUILD_FILE_NAME", ORIGINAL_FILE_NAME);
+        testParamMap.put("BUILD_PACK_NAME", BUILDER_LANGUAGE);
+        testParamMap.put("DEPLOY_TYPE", String.valueOf(JobConfig.BlueGreenDeployStatus.GREEN_DEPLOY));
+
+        gTestJobModel.setId(JOB_ID);
+
+        gTestJobDetailModel.setId(deployDetailJobId);
+        gTestJobDetailModel.setJobType(String.valueOf(JobService.JobType.DEPLOY));
+        gTestJobDetailModel.setDeployType(String.valueOf(JobConfig.DeployType.PRD));
+        gTestJobDetailModel.setJobGuid(JOB_GUID);
+        gTestJobDetailModel.setBuildJobId(buildJobId);
+        gTestJobDetailModel.setJobHistoryId(jobHistoryId);
+        gTestJobDetailModel.setBlueGreenDeployStatus(String.valueOf(JobConfig.BlueGreenDeployStatus.GREEN_DEPLOY));
+
+        gTestJobHistoryModel.setJobId(deployDetailJobId);
+        gTestJobHistoryModel.setFileId(FILE_ID);
+
+        gTestResultJobHistoryModel.setId(deployDetailJobId);
+
+
+        // GET SERVICE INSTANCES DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
+        // PROCESS TRIGGER JOB :: GET JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+        // GET BUILD JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + buildJobId, HttpMethod.GET, null, CustomJob.class)).thenReturn(new CustomJob());
+        // INSERT DEPLOY JOB HISTORY TO DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_JOB_HISTORY_URL, HttpMethod.POST, gTestJobHistoryModel, JobHistory.class)).thenReturn(gTestResultJobHistoryModel);
+        // GET DEPLOY JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + deployDetailJobId, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestDeployJobDetailModel);
+        // GET JOB HISTORY FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, JobHistory.class)).thenReturn(gTestJobHistoryModel);
+        // GET FILE DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_FILE_URL + "/" + FILE_ID, HttpMethod.GET, null, FileInfo.class)).thenReturn(gTestFileInfoModel);
+        // TRIGGER DEPLOY JOB TO CI SERVER
+        when(commonService.getCiTriggerHelper(CI_SERVER_URL)).thenReturn(ciTriggerHelper);
+        // TRIGGER DEPLOY JOB TO CI SERVER
+        when(ciTriggerHelper.triggerJobAndWaitUntilFinished(JOB_GUID, testParamMap, true)).thenReturn(buildWithDetails);
+        // TRIGGER DEPLOY JOB TO CI SERVER
+        when(buildWithDetails.getResult()).thenReturn(BuildResult.SUCCESS);
+        // TRIGGER DEPLOY JOB TO CI SERVER
+        when(buildWithDetails.getNumber()).thenReturn(1);
+        // UPDATE DEPLOY JOB HISTORY TO DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_JOB_HISTORY_URL, HttpMethod.PUT, gTestResultJobHistoryModel, JobHistory.class)).thenReturn(null);
+
+
+        // TEST
+        CustomJob resultModel = jobService.triggerJob(gTestJobModel, gTestJobHistoryModel);
+
+        assertThat(resultModel).isNotNull();
+        assertEquals(Constants.RESULT_STATUS_SUCCESS, resultModel.getResultStatus());
     }
 
 
@@ -2166,17 +2231,17 @@ public class JobServiceTest {
 
 
     /**
-     * Stop job valid model return model.
+     * Stop job valid model cancel queue item phase 1 return model.
      *
      * @throws Exception the exception
      */
     @Test
-    public void stopJob_ValidModel_ReturnModel() throws Exception {
+    public void stopJob_ValidModel_cancelQueueItem_phase_1_ReturnModel() throws Exception {
         List<QueueItem> queueItemList = new ArrayList<>();
         QueueItem testQueueItem = new QueueItem();
         long queueId = 1L;
 
-        testQueueItem.setId(JOB_ID);
+        testQueueItem.setId(queueId);
         queueItemList.add(testQueueItem);
 
         gTestJobModel.setJobGuid(JOB_GUID);
@@ -2200,6 +2265,123 @@ public class JobServiceTest {
         when(commonService.procGetCiHttpClient(CI_SERVER_URL)).thenReturn(ciHttpClient);
         // CANCEL QUEUE ITEM TO CI SERVER
         doNothing().when(ciHttpClient).post("/queue/cancelItem?id=" + queueId, true);
+
+
+        // TEST
+        CustomJob resultModel = jobService.stopJob(gTestJobModel);
+
+        assertThat(resultModel).isNotNull();
+        assertEquals(Constants.RESULT_STATUS_SUCCESS, resultModel.getResultStatus());
+    }
+
+
+    /**
+     * Stop job valid model cancel queue item phase 2 return model.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void stopJob_ValidModel_cancelQueueItem_phase_2_ReturnModel() throws Exception {
+        List<QueueItem> queueItemList = new ArrayList<>();
+        QueueItem testQueueItem = new QueueItem();
+        long queueId = 1L;
+
+        testQueueItem.setId(queueId + 1);
+        queueItemList.add(testQueueItem);
+
+        gTestJobModel.setJobGuid(JOB_GUID);
+
+
+        // GET SERVICE INSTANCES DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
+        // GET CI SERVER
+        when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
+        // GET QUEUE FROM CI SERVER
+        when(ciServer.getQueue()).thenReturn(ciQueue);
+        // GET QUEUE ITEM LIST FROM CI SERVER
+        when(ciQueue.getItems()).thenReturn(queueItemList);
+        // GET JOB DETAIL FROM CI SERVER
+        when(ciServer.getJob(JOB_GUID)).thenReturn(jobWithDetails);
+        // GET QUEUE ITEM FROM CI SERVER
+        when(jobWithDetails.getQueueItem()).thenReturn(queueItem);
+        // GET QUEUE ITEM ID FROM CI SERVER
+        when(queueItem.getId()).thenReturn(queueId);
+
+
+        // TEST
+        CustomJob resultModel = jobService.stopJob(gTestJobModel);
+
+        assertThat(resultModel).isNotNull();
+        assertEquals(Constants.RESULT_STATUS_SUCCESS, resultModel.getResultStatus());
+    }
+
+
+    /**
+     * Stop job valid model cancel queue item stop trigger job phase 1 return model.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void stopJob_ValidModel_cancelQueueItem_stopTriggerJob_phase_1_ReturnModel() throws Exception {
+        List<QueueItem> queueItemList = new ArrayList<>();
+        List<Build> buildList = new ArrayList<>();
+        Build buildItem = new Build();
+        buildList.add(buildItem);
+
+        gTestJobModel.setJobGuid(JOB_GUID);
+
+
+        // GET SERVICE INSTANCES DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
+        // GET CI SERVER
+        when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
+        // GET QUEUE FROM CI SERVER
+        when(ciServer.getQueue()).thenReturn(ciQueue);
+        // GET QUEUE ITEM LIST FROM CI SERVER
+        when(ciQueue.getItems()).thenReturn(queueItemList);
+        // GET JOB DETAIL FROM CI SERVER
+        when(ciServer.getJob(JOB_GUID)).thenReturn(jobWithDetails);
+        // GET BUILD LIST FROM CI SERVER
+        when(jobWithDetails.getBuilds()).thenReturn(buildList);
+        // STOP TRIGGER JOB TO CI SERVER
+        when(commonService.procGetCiHttpClient(CI_SERVER_URL)).thenReturn(ciHttpClient);
+        // STOP TRIGGER JOB TO CI SERVER
+        doNothing().when(ciHttpClient).post("/job/" + JOB_GUID + "/" + JOB_NUMBER + "/stop", true);
+
+
+        // TEST
+        CustomJob resultModel = jobService.stopJob(gTestJobModel);
+
+        assertThat(resultModel).isNotNull();
+        assertEquals(Constants.RESULT_STATUS_SUCCESS, resultModel.getResultStatus());
+    }
+
+
+    /**
+     * Stop job valid model cancel queue item stop trigger job phase 2 return model.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void stopJob_ValidModel_cancelQueueItem_stopTriggerJob_phase_2_ReturnModel() throws Exception {
+        List<QueueItem> queueItemList = new ArrayList<>();
+        List<Build> buildList = new ArrayList<>();
+
+        gTestJobModel.setJobGuid(JOB_GUID);
+
+
+        // GET SERVICE INSTANCES DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
+        // GET CI SERVER
+        when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
+        // GET QUEUE FROM CI SERVER
+        when(ciServer.getQueue()).thenReturn(ciQueue);
+        // GET QUEUE ITEM LIST FROM CI SERVER
+        when(ciQueue.getItems()).thenReturn(queueItemList);
+        // GET JOB DETAIL FROM CI SERVER
+        when(ciServer.getJob(JOB_GUID)).thenReturn(jobWithDetails);
+        // GET BUILD LIST FROM CI SERVER
+        when(jobWithDetails.getBuilds()).thenReturn(buildList);
 
 
         // TEST
