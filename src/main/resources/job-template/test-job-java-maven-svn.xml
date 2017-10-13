@@ -46,7 +46,11 @@ sonar.projectVersion=1.0
 sonar.sources=src
 sonar.junit.reportsPath=target/surefire-reports
 sonar.jacoco.reportPath=target/jacoco.exec
-sonar.java.binaries=target/classes</properties>
+sonar.java.binaries=target/classes
+sonar.svn.username=@SVN_USER_NAME
+sonar.svn.password.secured=@SVN_USER_PASSWORD
+sonar.scm.provider=svn
+sonar.scm.disabled=false</properties>
             <javaOpts></javaOpts>
             <additionalArguments></additionalArguments>
             <jdk>(Inherit From Job)</jdk>
