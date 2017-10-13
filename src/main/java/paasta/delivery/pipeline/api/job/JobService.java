@@ -664,9 +664,15 @@ public class JobService {
         // SET JOB ORDER :: SET TO DATABASE
         procSetJobOrder(jobDetail, OperationType.DECREASE);
 
-        if (JOB_TYPE_TEST.equals(jobDetail.getJobType())) {
-            // DELETE INSPECTION PROJECT TO INSPECTION API
-            inspectionProjectService.deleteProject(jobDetail);
+        // CONTINUE EVEN IF INSPECTION PROJECT SERVICE ERROR OCCURS
+        try {
+            if (JOB_TYPE_TEST.equals(jobDetail.getJobType())) {
+                // DELETE INSPECTION PROJECT TO INSPECTION API
+                inspectionProjectService.deleteProject(jobDetail);
+            }
+        } catch (Exception e) {
+            LOGGER.error("### ERROR ;: INSPECTION PROJECT SERVICE :: DELETE PROJECT ###");
+            return resultModel;
         }
 
         return resultModel;
@@ -1316,9 +1322,8 @@ public class JobService {
      * @param id        the id
      * @param jobNumber the job number
      * @return the job status
-     * @throws IOException the io exception
      */
-    CustomJob getJobStatus(int id, int jobNumber) throws IOException {
+    CustomJob getJobStatus(int id, int jobNumber) {
         CustomJob resultModel = new CustomJob();
         resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
         resultModel.setIsBuilding(String.valueOf(false));
@@ -1333,21 +1338,38 @@ public class JobService {
         // SET CI SERVER URL
         jobDetail.setCiServerUrl(procGetServiceInstances(jobDetail.getServiceInstancesId()).getCiServerUrl());
 
-        // GET JOB DETAIL FROM CI SERVER
-        JobWithDetails jobWithDetails = commonService.procGetCiServer(jobDetail.getCiServerUrl()).getJob(jobGuid);
-
-        if (jobWithDetails != null) {
-            // GET BUILD FROM CI SERVER
-            Build build = jobWithDetails.getBuildByNumber(jobNumber);
-
-            if (build != null) {
-                // GET BUILD DETAIL FROM CI SERVER
-                isBuilding = build.details().isBuilding();
-            }
-        }
-
         int lastJobNumber = jobDetail.getLastJobNumber();
         String lastJobStatus = jobDetail.getLastJobStatus();
+
+        // RETURN RESULT EVEN IF ERROR OCCURS
+        try {
+            // GET JOB DETAIL FROM CI SERVER
+            JobWithDetails jobWithDetails = commonService.procGetCiServer(jobDetail.getCiServerUrl()).getJob(jobGuid);
+
+            if (jobWithDetails != null) {
+                // GET BUILD FROM CI SERVER
+                Build build = jobWithDetails.getBuildByNumber(jobNumber);
+
+                if (build != null) {
+                    // GET BUILD DETAIL FROM CI SERVER
+                    isBuilding = build.details().isBuilding();
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error("### ERROR :: GET JOB STATUS ###");
+
+            if (jobNumber == lastJobNumber && procCheckLastJobStatus(lastJobStatus)) {
+                isBuilding = true;
+            }
+
+            resultModel.setId((long) id);
+            resultModel.setJobGuid(jobGuid);
+            resultModel.setJobNumber(jobNumber);
+            resultModel.setIsBuilding(String.valueOf(isBuilding));
+            resultModel.setLastJobStatus(lastJobStatus);
+
+            return resultModel;
+        }
 
         if (!isBuilding && jobNumber == lastJobNumber && procCheckLastJobStatus(lastJobStatus)) {
             isBuilding = true;

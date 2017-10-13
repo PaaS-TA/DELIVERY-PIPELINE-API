@@ -37,6 +37,10 @@ class TestJobTemplate extends JobCommonTemplate {
             inspectionProjectKey = "";
         }
 
+        // FOR SVN REPOSITORY
+        loadedJobTemplate = loadedJobTemplate.replace("@SVN_USER_NAME", customJob.getRepositoryAccountId());
+        loadedJobTemplate = loadedJobTemplate.replace("@SVN_USER_PASSWORD", customJob.getRepositoryAccountPassword());
+
         loadedJobTemplate = loadedJobTemplate.replace("@INSPECTION_PROJECT_NAME", inspectionProjectName);
         loadedJobTemplate = loadedJobTemplate.replace("@INSPECTION_PROJECT_KEY", inspectionProjectKey);
 
