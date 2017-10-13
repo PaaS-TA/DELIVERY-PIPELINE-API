@@ -1027,9 +1027,6 @@ public class JobService {
         long fileId = -1;
         String buildFilePath = Constants.EMPTY_VALUE;
         String buildFileName = Constants.EMPTY_VALUE;
-
-        // GET BUILD JOB DETAIL FROM DATABASE
-        CustomJob buildJobModel = procGetJobDetail(buildJobId);
         CustomJob deployJobModel;
 
         // INSERT JOB HISTORY TO DATABASE
@@ -1129,7 +1126,7 @@ public class JobService {
         paramMap.put("SPACE_NAME", deployJobModel.getDeployTargetSpace());
         paramMap.put("BUILD_FILE_PATH", buildFilePath);
         paramMap.put("BUILD_FILE_NAME", buildFileName);
-        paramMap.put("BUILD_PACK_NAME", procSetBuildPackName(buildJobModel));
+        paramMap.put("BUILD_PACK_NAME", procSetBuildPackName());
         paramMap.put("DEPLOY_TYPE", deployType);
 
         try {
@@ -1180,7 +1177,7 @@ public class JobService {
 
 
     // Set Build Pack Name
-    private String procSetBuildPackName(CustomJob customJob) {
+    private String procSetBuildPackName() {
         // JAVA :: DEFAULT
         return BuilderLanguage.JAVA.buildPackName;
     }
