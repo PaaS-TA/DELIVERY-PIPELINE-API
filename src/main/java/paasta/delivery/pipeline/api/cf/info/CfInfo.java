@@ -25,6 +25,7 @@ public class CfInfo {
     private String createdString;
     private String lastModifiedString;
 
+
     public long getId() {
         return id;
     }

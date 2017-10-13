@@ -527,6 +527,7 @@ public class JobService {
         // SET PARAM :: UPDATE JOB DETAIL
         customJob.setRepositoryCommitRevision(repositoryInfoModel.getRepositoryCommitRevision());
         customJob.setInspectionProjectId(jobDetail.getInspectionProjectId());
+        customJob.setInspectionProjectName(jobDetail.getInspectionProjectName());
         customJob.setInspectionProjectKey(jobDetail.getInspectionProjectKey());
         customJob.setInspectionProfileId(jobDetail.getInspectionProfileId());
         customJob.setInspectionGateId(jobDetail.getInspectionGateId());
@@ -1181,14 +1182,7 @@ public class JobService {
     // Set Build Pack Name
     private String procSetBuildPackName(CustomJob customJob) {
         // JAVA :: DEFAULT
-        String result = BuilderLanguage.JAVA.buildPackName;
-
-        // TODO :: GO
-        if (String.valueOf(BuilderLanguage.GO).equals(customJob.getBuilderType())) {
-            result = BuilderLanguage.GO.buildPackName;
-        }
-
-        return result;
+        return BuilderLanguage.JAVA.buildPackName;
     }
 
 
@@ -1245,7 +1239,7 @@ public class JobService {
 
         if (!queueItemList.isEmpty()) {
             // GET JOB DETAIL FROM CI SERVER
-            // GET QUEUE ITEM FROM CI SERVER
+            // GET QUEUE ITEM LIST FROM CI SERVER
             // GET QUEUE ITEM ID FROM CI SERVER
             queueItemId = ciServer.getJob(customJob.getJobGuid()).getQueueItem().getId();
 
@@ -1265,6 +1259,7 @@ public class JobService {
     // Stop Trigger Job
     private void procStopTriggerJob(JenkinsServer ciServer, CustomJob customJob) throws IOException {
         // GET JOB DETAIL FROM CI SERVER
+        // GET BUILD LIST FROM CI SERVER
         if (!ciServer.getJob(customJob.getJobGuid()).getBuilds().isEmpty()) {
             // STOP TRIGGER JOB TO CI SERVER
             commonService.procGetCiHttpClient(customJob.getCiServerUrl()).post("/job/" + customJob.getJobGuid() + "/" + customJob.getJobNumber() + "/stop", true);
