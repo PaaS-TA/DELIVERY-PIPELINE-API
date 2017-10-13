@@ -10,8 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import paasta.delivery.pipeline.api.cf.info.CfInfoService;
 import paasta.delivery.pipeline.api.cf.info.CfInfo;
+import paasta.delivery.pipeline.api.cf.info.CfInfoService;
 import paasta.delivery.pipeline.api.common.Constants;
 import paasta.delivery.pipeline.api.job.CustomJob;
 import paasta.delivery.pipeline.api.job.config.JobConfig;
@@ -34,6 +34,7 @@ public class JobTemplateServiceTest {
 
     private static final String REPOSITORY_URL = "test-repository-url";
     private static final String REPOSITORY_ACCOUNT_ID = "test-repository-account-id";
+    private static final String REPOSITORY_ACCOUNT_PASSWORD = "test-repository-account-password";
     private static final String REPOSITORY_BRUNCH = "test-repository-account-brunch";
     private static final String INSPECTION_PROJECT_NAME = "test-inspection-project-name";
     private static final String INSPECTION_PROJECT_KEY = "test-inspection-project-key";
@@ -65,6 +66,7 @@ public class JobTemplateServiceTest {
 
         gTestJobModel.setRepositoryUrl(REPOSITORY_URL);
         gTestJobModel.setRepositoryAccountId(REPOSITORY_ACCOUNT_ID);
+        gTestJobModel.setRepositoryAccountPassword(REPOSITORY_ACCOUNT_PASSWORD);
         gTestJobModel.setRepositoryBranch(REPOSITORY_BRUNCH);
         gTestJobModel.setInspectionProjectName(INSPECTION_PROJECT_NAME);
         gTestJobModel.setInspectionProjectKey(INSPECTION_PROJECT_KEY);
