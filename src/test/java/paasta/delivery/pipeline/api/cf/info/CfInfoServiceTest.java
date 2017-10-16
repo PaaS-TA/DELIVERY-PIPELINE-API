@@ -46,7 +46,7 @@ public class CfInfoServiceTest {
     private static final String TEST_CREATED_STRING = "test-created-string";
     private static final String TEST_LAST_MODIFIED_STRING = "test-last-modified-string";
 
-    private static CfInfo gTestResultCfInfo = null;
+    private static CfInfo gTestResultCfInfoModel = null;
     private static CustomJob gTestJobModel = null;
 
 
@@ -64,25 +64,25 @@ public class CfInfoServiceTest {
      */
     @Before
     public void setUp() throws Exception {
-        gTestResultCfInfo = new CfInfo();
+        gTestResultCfInfoModel = new CfInfo();
         gTestJobModel = new CustomJob();
 
         gTestJobModel.setCfInfoId(CF_INFO_ID);
 
-        gTestResultCfInfo.setId(CF_INFO_ID);
-        gTestResultCfInfo.setServiceInstancesId(SERVICE_INSTANCES_ID);
-        gTestResultCfInfo.setCfName(CF_NAME);
-        gTestResultCfInfo.setCfId(CF_ID);
-        gTestResultCfInfo.setCfPassword(CF_PASSWORD);
-        gTestResultCfInfo.setCfApiUrl(CF_API_URL);
-        gTestResultCfInfo.setDescription(TEST_DESCRIPTION);
-        gTestResultCfInfo.setUserId(USER_ID);
-        gTestResultCfInfo.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
-        gTestResultCfInfo.setResultMessage(RESULT_MESSAGE);
-        gTestResultCfInfo.setCreated(TEST_CREATED);
-        gTestResultCfInfo.setLastModified(TEST_LAST_MODIFIED);
-        gTestResultCfInfo.setCreatedString(TEST_CREATED_STRING);
-        gTestResultCfInfo.setLastModifiedString(TEST_LAST_MODIFIED_STRING);
+        gTestResultCfInfoModel.setId(CF_INFO_ID);
+        gTestResultCfInfoModel.setServiceInstancesId(SERVICE_INSTANCES_ID);
+        gTestResultCfInfoModel.setCfName(CF_NAME);
+        gTestResultCfInfoModel.setCfId(CF_ID);
+        gTestResultCfInfoModel.setCfPassword(CF_PASSWORD);
+        gTestResultCfInfoModel.setCfApiUrl(CF_API_URL);
+        gTestResultCfInfoModel.setDescription(TEST_DESCRIPTION);
+        gTestResultCfInfoModel.setUserId(USER_ID);
+        gTestResultCfInfoModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        gTestResultCfInfoModel.setResultMessage(RESULT_MESSAGE);
+        gTestResultCfInfoModel.setCreated(TEST_CREATED);
+        gTestResultCfInfoModel.setLastModified(TEST_LAST_MODIFIED);
+        gTestResultCfInfoModel.setCreatedString(TEST_CREATED_STRING);
+        gTestResultCfInfoModel.setLastModifiedString(TEST_LAST_MODIFIED_STRING);
     }
 
 
@@ -109,7 +109,7 @@ public class CfInfoServiceTest {
     @Test
     public void getCfInfo_ValidModel_ReturnModel() throws Exception {
         // GET CF INFO DETAIL FROM DATABASE
-        when(restTemplateService.send(Constants.TARGET_COMMON_API, "/cf-info/" + gTestJobModel.getCfInfoId(), HttpMethod.GET, null, CfInfo.class)).thenReturn(gTestResultCfInfo);
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, "/cf-info/" + gTestJobModel.getCfInfoId(), HttpMethod.GET, null, CfInfo.class)).thenReturn(gTestResultCfInfoModel);
 
         // TEST
         CfInfo resultModel = cfInfoService.getCfInfo(gTestJobModel);
