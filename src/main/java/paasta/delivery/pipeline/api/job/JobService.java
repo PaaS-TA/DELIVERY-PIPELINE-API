@@ -510,9 +510,6 @@ public class JobService {
         long pipelineId = customJob.getPipelineId();
         String reqJobName = customJob.getJobName();
 
-        // UPDATE TEST JOB TO CI SERVER
-        commonService.procGetCiServer(customJob.getCiServerUrl()).updateJob(customJob.getJobGuid(), jobTemplateService.getTestJobTemplate(customJob), true);
-
         // GET JOB DETAIL FROM DATABASE
         CustomJob jobDetail = procGetJobDetail(jobId);
 
@@ -529,8 +526,11 @@ public class JobService {
         customJob.setInspectionProjectId(jobDetail.getInspectionProjectId());
         customJob.setInspectionProjectName(jobDetail.getInspectionProjectName());
         customJob.setInspectionProjectKey(jobDetail.getInspectionProjectKey());
-        customJob.setInspectionProfileId(jobDetail.getInspectionProfileId());
-        customJob.setInspectionGateId(jobDetail.getInspectionGateId());
+        customJob.setInspectionProfileId(customJob.getInspectionProfileId());
+        customJob.setInspectionGateId(customJob.getInspectionGateId());
+
+        // UPDATE TEST JOB TO CI SERVER
+        commonService.procGetCiServer(customJob.getCiServerUrl()).updateJob(customJob.getJobGuid(), jobTemplateService.getTestJobTemplate(customJob), true);
 
         // SET REPOSITORY ACCOUNT PASSWORD BY AES256
         customJob.setRepositoryAccountPassword(commonService.setPasswordByAES256(Constants.AES256Type.ENCODE, customJob.getRepositoryAccountPassword()));
@@ -1347,6 +1347,17 @@ public class JobService {
                     isBuilding = build.details().isBuilding();
                 }
             }
+
+            if (!isBuilding && jobNumber == lastJobNumber && procCheckLastJobStatus(lastJobStatus)) {
+                isBuilding = true;
+            }
+
+            resultModel.setId((long) id);
+            resultModel.setJobGuid(jobGuid);
+            resultModel.setJobNumber(jobNumber);
+            resultModel.setIsBuilding(String.valueOf(isBuilding));
+            resultModel.setLastJobStatus(lastJobStatus);
+
         } catch (IOException e) {
             LOGGER.error("### ERROR :: GET JOB STATUS ###");
 
@@ -1362,16 +1373,6 @@ public class JobService {
 
             return resultModel;
         }
-
-        if (!isBuilding && jobNumber == lastJobNumber && procCheckLastJobStatus(lastJobStatus)) {
-            isBuilding = true;
-        }
-
-        resultModel.setId((long) id);
-        resultModel.setJobGuid(jobGuid);
-        resultModel.setJobNumber(jobNumber);
-        resultModel.setIsBuilding(String.valueOf(isBuilding));
-        resultModel.setLastJobStatus(lastJobStatus);
 
         return resultModel;
     }
