@@ -1,7 +1,5 @@
 package paasta.delivery.pipeline.api.job.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import paasta.delivery.pipeline.api.common.ConfigType;
 
@@ -21,16 +19,16 @@ import java.util.List;
 @Service
 public class JobConfigService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobConfigService.class);
-
-
     /**
      * Gets config type list.
      *
      * @param configType the config type
      * @return the config type list
+     * @throws NoSuchMethodException     the no such method exception
+     * @throws IllegalAccessException    the illegal access exception
+     * @throws InvocationTargetException the invocation target exception
      */
-    List<ConfigType> getConfigTypeList(String configType) {
+    List<ConfigType> getConfigTypeList(String configType) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         List<ConfigType> resultList = new ArrayList<>();
 
         // JOB TYPE
@@ -78,7 +76,7 @@ public class JobConfigService {
     }
 
 
-    private List<ConfigType> procConfigTypeList(Object[] enumArray) {
+    private List<ConfigType> procConfigTypeList(Object[] enumArray) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         List<ConfigType> resultList = new ArrayList<>();
         ConfigType tempModel;
 
@@ -86,17 +84,9 @@ public class JobConfigService {
             tempModel = new ConfigType();
             tempModel.setTypeName(String.valueOf(anEnumArray));
 
-            try {
-                Method methodGetActualValue = anEnumArray.getClass().getMethod("getActualValue");
-                methodGetActualValue.invoke(anEnumArray);
-                tempModel.setTypeValue((String) methodGetActualValue.invoke(anEnumArray));
-            } catch (NoSuchMethodException e) {
-                LOGGER.error("NoSuchMethodException :: {}", e);
-            } catch (IllegalAccessException e) {
-                LOGGER.error("IllegalAccessException :: {}", e);
-            } catch (InvocationTargetException e) {
-                LOGGER.error("InvocationTargetException :: {}", e);
-            }
+            Method methodGetActualValue = anEnumArray.getClass().getMethod("getActualValue");
+            methodGetActualValue.invoke(anEnumArray);
+            tempModel.setTypeValue((String) methodGetActualValue.invoke(anEnumArray));
 
             resultList.add(tempModel);
         }

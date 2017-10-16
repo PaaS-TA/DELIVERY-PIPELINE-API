@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import paasta.delivery.pipeline.api.common.ConfigType;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
@@ -33,9 +34,12 @@ public class JobConfigController {
      *
      * @param configType the config type
      * @return the config type list
+     * @throws NoSuchMethodException     the no such method exception
+     * @throws IllegalAccessException    the illegal access exception
+     * @throws InvocationTargetException the invocation target exception
      */
     @RequestMapping(value = "/{configType:.+}", method = RequestMethod.GET)
-    public List<ConfigType> getConfigTypeList(@PathVariable("configType") String configType) {
+    public List<ConfigType> getConfigTypeList(@PathVariable("configType") String configType) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return jobConfigService.getConfigTypeList(configType);
     }
 
