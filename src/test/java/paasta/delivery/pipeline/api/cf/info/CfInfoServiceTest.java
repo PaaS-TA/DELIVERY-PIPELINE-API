@@ -33,6 +33,19 @@ import static org.mockito.Mockito.when;
 public class CfInfoServiceTest {
 
     private static final long CF_INFO_ID = 1L;
+    private static final String SERVICE_INSTANCES_ID = "test-service-instances-id";
+    private static final String CF_NAME = "test-cf-name";
+    private static final String CF_ID = "test-cf-id";
+    private static final String CF_PASSWORD = "test-cf-password";
+    private static final String CF_API_URL = "test-cf-api-url";
+    private static final String TEST_DESCRIPTION = "test-description";
+    private static final String USER_ID = "test-user-id";
+    private static final String RESULT_MESSAGE = "test-result-message";
+    private static final String TEST_CREATED = "test-created";
+    private static final String TEST_LAST_MODIFIED = "test-last-modified";
+    private static final String TEST_CREATED_STRING = "test-created-string";
+    private static final String TEST_LAST_MODIFIED_STRING = "test-last-modified-string";
+
     private static CfInfo gTestResultCfInfo = null;
     private static CustomJob gTestJobModel = null;
 
@@ -51,35 +64,25 @@ public class CfInfoServiceTest {
      */
     @Before
     public void setUp() throws Exception {
-        CfInfo gTestCfInfo = new CfInfo();
         gTestResultCfInfo = new CfInfo();
         gTestJobModel = new CustomJob();
 
         gTestJobModel.setCfInfoId(CF_INFO_ID);
 
-        gTestCfInfo.setId(CF_INFO_ID);
-        gTestCfInfo.setServiceInstancesId("");
-        gTestCfInfo.setCfName("");
-        gTestCfInfo.setDescription("");
-        gTestCfInfo.setUserId("");
-        gTestCfInfo.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
-        gTestCfInfo.setResultMessage("");
-        gTestCfInfo.setCreated("");
-        gTestCfInfo.setLastModified("");
-        gTestCfInfo.setCreatedString("");
-        gTestCfInfo.setLastModifiedString("");
-
-        gTestResultCfInfo.setId(gTestCfInfo.getId());
-        gTestResultCfInfo.setServiceInstancesId(gTestCfInfo.getServiceInstancesId());
-        gTestResultCfInfo.setCfName(gTestCfInfo.getCfName());
-        gTestResultCfInfo.setDescription(gTestCfInfo.getDescription());
-        gTestResultCfInfo.setUserId(gTestCfInfo.getUserId());
-        gTestResultCfInfo.setResultStatus(gTestCfInfo.getResultStatus());
-        gTestResultCfInfo.setResultMessage(gTestCfInfo.getResultMessage());
-        gTestResultCfInfo.setCreated(gTestCfInfo.getCreated());
-        gTestResultCfInfo.setLastModified(gTestCfInfo.getLastModified());
-        gTestResultCfInfo.setCreatedString(gTestCfInfo.getCreatedString());
-        gTestResultCfInfo.setLastModifiedString(gTestCfInfo.getLastModifiedString());
+        gTestResultCfInfo.setId(CF_INFO_ID);
+        gTestResultCfInfo.setServiceInstancesId(SERVICE_INSTANCES_ID);
+        gTestResultCfInfo.setCfName(CF_NAME);
+        gTestResultCfInfo.setCfId(CF_ID);
+        gTestResultCfInfo.setCfPassword(CF_PASSWORD);
+        gTestResultCfInfo.setCfApiUrl(CF_API_URL);
+        gTestResultCfInfo.setDescription(TEST_DESCRIPTION);
+        gTestResultCfInfo.setUserId(USER_ID);
+        gTestResultCfInfo.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        gTestResultCfInfo.setResultMessage(RESULT_MESSAGE);
+        gTestResultCfInfo.setCreated(TEST_CREATED);
+        gTestResultCfInfo.setLastModified(TEST_LAST_MODIFIED);
+        gTestResultCfInfo.setCreatedString(TEST_CREATED_STRING);
+        gTestResultCfInfo.setLastModifiedString(TEST_LAST_MODIFIED_STRING);
     }
 
 
@@ -113,6 +116,19 @@ public class CfInfoServiceTest {
 
         assertThat(resultModel).isNotNull();
         assertEquals(Constants.RESULT_STATUS_SUCCESS, resultModel.getResultStatus());
+        assertEquals(CF_INFO_ID, resultModel.getId());
+        assertEquals(SERVICE_INSTANCES_ID, resultModel.getServiceInstancesId());
+        assertEquals(CF_NAME, resultModel.getCfName());
+        assertEquals(CF_ID, resultModel.getCfId());
+        assertEquals(CF_PASSWORD, resultModel.getCfPassword());
+        assertEquals(CF_API_URL, resultModel.getCfApiUrl());
+        assertEquals(TEST_DESCRIPTION, resultModel.getDescription());
+        assertEquals(USER_ID, resultModel.getUserId());
+        assertEquals(RESULT_MESSAGE, resultModel.getResultMessage());
+        assertEquals(TEST_CREATED, resultModel.getCreated());
+        assertEquals(TEST_LAST_MODIFIED, resultModel.getLastModified());
+        assertEquals(TEST_CREATED_STRING, resultModel.getCreatedString());
+        assertEquals(TEST_LAST_MODIFIED_STRING, resultModel.getLastModifiedString());
     }
 
 }

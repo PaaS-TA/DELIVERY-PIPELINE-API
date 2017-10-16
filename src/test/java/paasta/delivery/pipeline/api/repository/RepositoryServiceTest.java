@@ -206,6 +206,12 @@ public class RepositoryServiceTest {
         assertEquals(Constants.RESULT_STATUS_SUCCESS, resultModel.getResultStatus());
     }
 
+
+    /**
+     * Gets repository info git hub invalid model return model.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void getRepositoryInfo_GIT_HUB_InvalidModel_ReturnModel() throws Exception {
         LinkedHashMap testResultMap = new LinkedHashMap();
