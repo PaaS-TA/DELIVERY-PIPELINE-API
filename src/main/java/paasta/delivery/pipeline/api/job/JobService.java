@@ -446,17 +446,20 @@ public class JobService {
         CustomJob resultModel = new CustomJob();
         resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
         String jobGuid = procSetJobGuid(JobType.TEST);
+        String repositoryAccountPassword;
         customJob.setJobGuid(jobGuid);
 
         // GET JOB DETAIL FROM DATABASE
         CustomJob buildJobDetail = procGetJobDetail(customJob.getBuildJobId());
+
+        repositoryAccountPassword = buildJobDetail.getRepositoryAccountPassword();
 
         customJob.setBuilderType(buildJobDetail.getBuilderType());
         customJob.setRepositoryType(buildJobDetail.getRepositoryType());
         customJob.setRepositoryUrl(buildJobDetail.getRepositoryUrl());
         customJob.setRepositoryId(buildJobDetail.getRepositoryId());
         customJob.setRepositoryAccountId(buildJobDetail.getRepositoryAccountId());
-        customJob.setRepositoryAccountPassword(buildJobDetail.getRepositoryAccountPassword());
+        customJob.setRepositoryAccountPassword(repositoryAccountPassword);
         customJob.setRepositoryBranch(buildJobDetail.getRepositoryBranch());
         customJob.setRepositoryCommitRevision(buildJobDetail.getRepositoryCommitRevision());
 
@@ -475,7 +478,7 @@ public class JobService {
         customJob.setJobName(procSetJobName(customJob.getPipelineId(), customJob.getJobName()));
 
         // SET REPOSITORY ACCOUNT PASSWORD BY AES256
-        customJob.setRepositoryAccountPassword(commonService.setPasswordByAES256(Constants.AES256Type.ENCODE, buildJobDetail.getRepositoryAccountPassword()));
+        customJob.setRepositoryAccountPassword(commonService.setPasswordByAES256(Constants.AES256Type.ENCODE, repositoryAccountPassword));
 
         // INSERT TEST JOB TO DATABASE
         resultModel = procCreateJobToDb(customJob);
@@ -509,31 +512,39 @@ public class JobService {
         long jobId = customJob.getId();
         long pipelineId = customJob.getPipelineId();
         String reqJobName = customJob.getJobName();
+        String repositoryAccountPassword;
+
+        // GET BUILD JOB DETAIL FROM DATABASE
+        CustomJob buildJobDetail = procGetJobDetail(customJob.getBuildJobId());
 
         // GET JOB DETAIL FROM DATABASE
         CustomJob jobDetail = procGetJobDetail(jobId);
+
+        repositoryAccountPassword = buildJobDetail.getRepositoryAccountPassword();
+
+        // SET PARAM :: UPDATE JOB DETAIL
+        customJob.setBuilderType(buildJobDetail.getBuilderType());
+        customJob.setRepositoryType(buildJobDetail.getRepositoryType());
+        customJob.setRepositoryUrl(buildJobDetail.getRepositoryUrl());
+        customJob.setRepositoryId(buildJobDetail.getRepositoryId());
+        customJob.setRepositoryAccountId(buildJobDetail.getRepositoryAccountId());
+        customJob.setRepositoryAccountPassword(repositoryAccountPassword);
+        customJob.setRepositoryBranch(buildJobDetail.getRepositoryBranch());
+        customJob.setRepositoryCommitRevision(buildJobDetail.getRepositoryCommitRevision());
+        customJob.setInspectionProjectId(jobDetail.getInspectionProjectId());
+        customJob.setInspectionProjectName(jobDetail.getInspectionProjectName());
+        customJob.setInspectionProjectKey(jobDetail.getInspectionProjectKey());
 
         // SET JOB NAME :: CHECK FROM DATABASE
         if (!jobDetail.getJobName().equals(reqJobName)) {
             customJob.setJobName(procSetJobName(pipelineId, reqJobName));
         }
 
-        // GET REPOSITORY COMMIT REVISION
-        CustomJob repositoryInfoModel = repositoryService.getRepositoryInfo(String.valueOf(jobId));
-
-        // SET PARAM :: UPDATE JOB DETAIL
-        customJob.setRepositoryCommitRevision(repositoryInfoModel.getRepositoryCommitRevision());
-        customJob.setInspectionProjectId(jobDetail.getInspectionProjectId());
-        customJob.setInspectionProjectName(jobDetail.getInspectionProjectName());
-        customJob.setInspectionProjectKey(jobDetail.getInspectionProjectKey());
-        customJob.setInspectionProfileId(customJob.getInspectionProfileId());
-        customJob.setInspectionGateId(customJob.getInspectionGateId());
-
         // UPDATE TEST JOB TO CI SERVER
         commonService.procGetCiServer(customJob.getCiServerUrl()).updateJob(customJob.getJobGuid(), jobTemplateService.getTestJobTemplate(customJob), true);
 
         // SET REPOSITORY ACCOUNT PASSWORD BY AES256
-        customJob.setRepositoryAccountPassword(commonService.setPasswordByAES256(Constants.AES256Type.ENCODE, customJob.getRepositoryAccountPassword()));
+        customJob.setRepositoryAccountPassword(commonService.setPasswordByAES256(Constants.AES256Type.ENCODE, repositoryAccountPassword));
 
         // UPDATE TEST JOB TO DATABASE
         resultModel = procUpdateJobToDb(customJob);
@@ -672,7 +683,7 @@ public class JobService {
                 inspectionProjectService.deleteProject(jobDetail);
             }
         } catch (Exception e) {
-            LOGGER.error("### ERROR ;: INSPECTION PROJECT SERVICE :: DELETE PROJECT ###");
+            LOGGER.error("### ERROR :: INSPECTION PROJECT SERVICE :: DELETE PROJECT ###");
             return resultModel;
         }
 
@@ -904,11 +915,6 @@ public class JobService {
             resultModel.setDuration(jobDuration);
             resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
-        } catch (IOException e) {
-            throw new TriggerException("IOException :: {}", e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new TriggerException("InterruptedException :: {}", e);
         } catch (Exception e) {
             throw new TriggerException("Exception :: TriggerBuildJob :: {}", e);
         }
@@ -1000,9 +1006,6 @@ public class JobService {
             resultModel.setDuration(jobDuration);
             resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new TriggerException("InterruptedException :: {}", e);
         } catch (Exception e) {
             throw new TriggerException("Exception :: TriggerTestJob :: {}", e);
         }
@@ -1165,10 +1168,7 @@ public class JobService {
             resultModel.setDuration(jobDuration);
             resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
-        } catch (IOException e) {
-            throw new TriggerException("IOException", e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        } catch (Exception e) {
             throw new TriggerException("InterruptedException", e);
         }
 
@@ -1358,7 +1358,7 @@ public class JobService {
             resultModel.setIsBuilding(String.valueOf(isBuilding));
             resultModel.setLastJobStatus(lastJobStatus);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.error("### ERROR :: GET JOB STATUS ###");
 
             if (jobNumber == lastJobNumber && procCheckLastJobStatus(lastJobStatus)) {
