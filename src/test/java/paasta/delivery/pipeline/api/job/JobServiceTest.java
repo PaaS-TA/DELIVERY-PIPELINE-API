@@ -56,6 +56,7 @@ public class JobServiceTest {
     private static final String SERVICE_INSTANCES_ID = "test-service-instances-id";
     private static final long PIPELINE_ID = 1L;
     private static final long JOB_ID = 2L;
+    private static final long BUILD_JOB_ID = 22L;
     private static final int JOB_ID_IN_MAP = 3;
     private static final long FILE_ID = 4L;
     private static final long JOB_HISTORY_ID = 5L;
@@ -65,9 +66,11 @@ public class JobServiceTest {
     private static final String JOB_NAME = "test-job-name";
     private static final String JOB_GUID = "test-job-" + UUID.randomUUID().toString();
     private static final String JOB_XML = "test-job-xml";
+    private static final String REPOSITORY_URL = "test-repository-url";
     private static final String REPOSITORY_ID = "test-repository-id";
     private static final String REPOSITORY_ACCOUNT_ID = "test-repository-account-id";
     private static final String REPOSITORY_ACCOUNT_PASSWORD = "test-repository-account-password";
+    private static final String REPOSITORY_BRANCH = "test-repository-branch";
     private static final String REPOSITORY_COMMIT_REVISION = "test-repository-commit-revision";
     private static final String REPOSITORY_COMMIT_REVISON = "test-repository-commit-revision";
     private static final String CHECK_EXISTED_JOB_NAME_URL = REQ_PIPELINES_URL + PIPELINE_ID + "/job-names/";
@@ -176,8 +179,13 @@ public class JobServiceTest {
         gTestJobDetailModel.setId(JOB_ID);
         gTestJobDetailModel.setGroupOrder(1);
         gTestJobDetailModel.setJobOrder(1);
+        gTestJobDetailModel.setBuilderType(String.valueOf(JobConfig.BuilderType.GRADLE));
+        gTestJobDetailModel.setRepositoryType(String.valueOf(JobConfig.RepositoryType.SCM_GIT));
+        gTestJobDetailModel.setRepositoryUrl(REPOSITORY_URL);
+        gTestJobDetailModel.setRepositoryId(REPOSITORY_ID);
         gTestJobDetailModel.setRepositoryAccountId(REPOSITORY_ACCOUNT_ID);
         gTestJobDetailModel.setRepositoryAccountPassword(REPOSITORY_ACCOUNT_PASSWORD);
+        gTestJobDetailModel.setRepositoryBranch(REPOSITORY_BRANCH);
         gTestJobDetailModel.setRepositoryCommitRevision(REPOSITORY_COMMIT_REVISION);
         gTestJobDetailModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
 
@@ -1235,6 +1243,7 @@ public class JobServiceTest {
     @Test
     public void updateJob_TEST_ValidModel_ReturnModel() throws Exception {
         gTestJobModel.setId(JOB_ID);
+        gTestJobModel.setBuildJobId(BUILD_JOB_ID);
         gTestJobModel.setJobType(String.valueOf(JobService.JobType.TEST));
         gTestJobModel.setJobName(JOB_NAME);
 
@@ -1245,6 +1254,8 @@ public class JobServiceTest {
 
         // GET SERVICE INSTANCES DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
+        // GET BUILD JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + gTestJobModel.getBuildJobId(), HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + gTestJobModel.getId(), HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
         // GET JOB XML FROM TEMPLATE FILE
@@ -1278,6 +1289,7 @@ public class JobServiceTest {
     @Test
     public void updateJob_TEST_setJobName_ValidModel_ReturnModel() throws Exception {
         gTestJobModel.setId(JOB_ID);
+        gTestJobModel.setBuildJobId(BUILD_JOB_ID);
         gTestJobModel.setJobType(String.valueOf(JobService.JobType.TEST));
         gTestJobModel.setJobName(JOB_NAME + "-1");
 
@@ -1288,6 +1300,8 @@ public class JobServiceTest {
 
         // GET SERVICE INSTANCES DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
+        // GET BUILD JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + gTestJobModel.getBuildJobId(), HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
         // GET JOB DETAIL FROM DATABASE
         when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + gTestJobModel.getId(), HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
         // GET JOB XML FROM TEMPLATE FILE
@@ -1530,6 +1544,52 @@ public class JobServiceTest {
         // DELETE INSPECTION PROJECT TO INSPECTION API
         when(inspectionProjectService.deleteProject(gTestResultJobModel)).thenReturn(gTestResultInspectionProjectModel);
 
+
+        // TEST
+        CustomJob resultModel = jobService.deleteJob(String.valueOf(JOB_ID));
+
+        assertThat(resultModel).isNotNull();
+        assertEquals(Constants.RESULT_STATUS_SUCCESS, resultModel.getResultStatus());
+    }
+
+
+    /**
+     * Delete job valid job id invalid delete project return model.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void deleteJob_ValidJobId_invalidDeleteProject_ReturnModel() throws Exception {
+        String reqUrl = REQ_PIPELINES_URL + PIPELINE_ID + REQ_URL;
+
+        gTestResultJobModel.setJobType(String.valueOf(JobService.JobType.TEST));
+
+
+        // GET SERVICE INSTANCES DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
+        // GET JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestResultJobModel);
+        // DELETE JOB IN CI SERVER
+        when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
+        // DELETE JOB IN CI SERVER
+        doNothing().when(ciServer).deleteJob(JOB_GUID, true);
+        // DELETE WORKSPACE IN CI SERVER
+        doNothing().when(jobBuiltFileService).deleteWorkspace(gTestResultJobModel);
+        // DELETE JOB TO DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID, HttpMethod.DELETE, null, String.class)).thenReturn(null);
+        // GET JOB HISTORY LIST FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID + REQ_HISTORY_URL, HttpMethod.GET, null, List.class)).thenReturn(new ArrayList());
+        // DELETE JOB HISTORY TO DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID + REQ_HISTORY_URL, HttpMethod.DELETE, null, String.class)).thenReturn(null);
+        // SET JOB ORDER IN PIPELINE
+        // GET JOB LIST FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, List.class)).thenReturn(gTestResultList);
+        // GET JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID_IN_MAP, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+        // DELETE INSPECTION PROJECT TO INSPECTION API
+        when(inspectionProjectService.deleteProject(gTestResultJobModel)).thenThrow(Exception.class);
+
+
         // TEST
         CustomJob resultModel = jobService.deleteJob(String.valueOf(JOB_ID));
 
@@ -1746,6 +1806,35 @@ public class JobServiceTest {
 
 
     /**
+     * Trigger job build valid model exception return model.
+     *
+     * @throws Exception the exception
+     */
+    @Test(expected = Exception.class)
+    public void triggerJob_BUILD_ValidModel_exception_ReturnModel() throws Exception {
+        gTestJobModel.setId(JOB_ID);
+
+        gTestJobDetailModel.setCiServerUrl(CI_SERVER_URL);
+        gTestJobDetailModel.setJobType(String.valueOf(JobService.JobType.BUILD));
+        gTestJobDetailModel.setJobGuid(JOB_GUID);
+
+
+        // PROCESS TRIGGER JOB :: GET JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+        // GET SERVICE INSTANCES DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
+        // INSERT BUILD JOB HISTORY TO DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_JOB_HISTORY_URL, HttpMethod.POST, gTestJobHistoryModel, JobHistory.class)).thenReturn(gTestResultJobHistoryModel);
+        // TRIGGER BUILD JOB TO CI SERVER
+        when(commonService.getCiTriggerHelper(CI_SERVER_URL)).thenThrow(Exception.class);
+
+
+        // TEST
+        CustomJob resultModel = jobService.triggerJob(gTestJobModel, gTestJobHistoryModel);
+    }
+
+
+    /**
      * Trigger job build valid model scheduler modified push yn y return model.
      *
      * @throws Exception the exception
@@ -1878,6 +1967,35 @@ public class JobServiceTest {
 
 
     /**
+     * Trigger job test valid model exception return model.
+     *
+     * @throws Exception the exception
+     */
+    @Test(expected = Exception.class)
+    public void triggerJob_TEST_ValidModel_exception_ReturnModel() throws Exception {
+        gTestJobModel.setId(JOB_ID);
+
+        gTestJobDetailModel.setCiServerUrl(CI_SERVER_URL);
+        gTestJobDetailModel.setJobType(String.valueOf(JobService.JobType.TEST));
+        gTestJobDetailModel.setJobGuid(JOB_GUID);
+
+
+        // PROCESS TRIGGER JOB :: GET JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+        // GET SERVICE INSTANCES DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
+        // INSERT TEST JOB HISTORY TO DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_JOB_HISTORY_URL, HttpMethod.POST, gTestJobHistoryModel, JobHistory.class)).thenReturn(gTestResultJobHistoryModel);
+        // TRIGGER TEST JOB TO CI SERVER
+        when(commonService.getCiTriggerHelper(CI_SERVER_URL)).thenThrow(Exception.class);
+
+
+        // TEST
+        CustomJob resultModel = jobService.triggerJob(gTestJobModel, gTestJobHistoryModel);
+    }
+
+
+    /**
      * Trigger job deploy dev valid model return model.
      *
      * @throws Exception the exception
@@ -1999,6 +2117,53 @@ public class JobServiceTest {
 
         assertThat(resultModel).isNotNull();
         assertEquals(Constants.RESULT_STATUS_FAIL, resultModel.getResultStatus());
+    }
+
+
+    /**
+     * Trigger job deploy dev valid model exception return model.
+     *
+     * @throws Exception the exception
+     */
+    @Test(expected = Exception.class)
+    public void triggerJob_DEPLOY_dev_ValidModel_exception_ReturnModel() throws Exception {
+        long buildJobId = 10L;
+        long deployDetailJobId = 11L;
+        long jobHistoryId = 0L;
+        String reqUrl = REQ_URL + "/" + buildJobId + REQ_HISTORY_URL + "/status/" + Constants.EMPTY_VALUE + "/first";
+
+        gTestJobModel.setId(JOB_ID);
+
+        gTestJobDetailModel.setId(deployDetailJobId);
+        gTestJobDetailModel.setJobType(String.valueOf(JobService.JobType.DEPLOY));
+        gTestJobDetailModel.setJobGuid(JOB_GUID);
+        gTestJobDetailModel.setBuildJobId(buildJobId);
+        gTestJobDetailModel.setJobHistoryId(jobHistoryId);
+
+        gTestJobHistoryModel.setJobId(deployDetailJobId);
+        gTestJobHistoryModel.setFileId(FILE_ID);
+
+        gTestResultJobHistoryModel.setId(deployDetailJobId);
+
+
+        // GET SERVICE INSTANCES DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
+        // PROCESS TRIGGER JOB :: GET JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestJobDetailModel);
+        // INSERT DEPLOY JOB HISTORY TO DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_JOB_HISTORY_URL, HttpMethod.POST, gTestJobHistoryModel, JobHistory.class)).thenReturn(gTestResultJobHistoryModel);
+        // GET DEPLOY JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + deployDetailJobId, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestDeployJobDetailModel);
+        // GET JOB HISTORY FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, reqUrl, HttpMethod.GET, null, JobHistory.class)).thenReturn(gTestJobHistoryModel);
+        // GET FILE DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_FILE_URL + "/" + FILE_ID, HttpMethod.GET, null, FileInfo.class)).thenReturn(gTestFileInfoModel);
+        // TRIGGER DEPLOY JOB TO CI SERVER
+        when(commonService.getCiTriggerHelper(CI_SERVER_URL)).thenThrow(Exception.class);
+
+
+        // TEST
+        CustomJob resultModel = jobService.triggerJob(gTestJobModel, gTestJobHistoryModel);
     }
 
 
