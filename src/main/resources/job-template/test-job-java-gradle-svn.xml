@@ -48,8 +48,9 @@
 sonar.projectKey=@INSPECTION_PROJECT_KEY
 sonar.projectVersion=1.0
 sonar.sources=.
+sonar.working.directory=sonar
 sonar.junit.reportsPath=build/test-results/test
-sonar.jacoco.reportPath=build//jacoco/jacoco-overall.exec
+sonar.jacoco.reportPath=build/jacoco/jacoco-overall.exec
 sonar.java.binaries=build/classes
 sonar.svn.username=@SVN_USER_NAME
 sonar.svn.password.secured=@SVN_USER_PASSWORD
