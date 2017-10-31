@@ -105,7 +105,11 @@ public class JobBuiltFileService {
 
         // SEND FILE TO BINARY STORAGE API
         FileInfo fileInfo = restTemplateService.sendMultipart(Constants.TARGET_BINARY_STORAGE_API, REQ_FILE_URL + "/uploadFile", byteArrayResource, FileInfo.class);
-        resultModel.setFileId(fileInfo.getId());
+
+        // INSERT FILE INFO TO DATABASE
+        FileInfo resultFileInfoModel = restTemplateService.send(Constants.TARGET_COMMON_API, REQ_FILE_URL + "/upload", HttpMethod.POST, fileInfo, FileInfo.class);
+        resultModel.setFileId(resultFileInfoModel.getId());
+        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
 
         return resultModel;
     }
@@ -151,6 +155,22 @@ public class JobBuiltFileService {
 
     private Session procCreateJSchSession(String ciServerUrl) {
         String host = ciServerUrl.replace("http://", "");
+        String charSequence = ":";
+
+        LOGGER.error("################################################");
+        LOGGER.error("################################################");
+        LOGGER.error("################################################");
+        LOGGER.error("################################################");
+        LOGGER.error("###################### host BEFORE :: {}", host);
+
+        host = (host.contains(charSequence)) ? host.split(charSequence)[0] : host;
+
+        LOGGER.error("###################### host AFTER :: {}", host);
+        LOGGER.error("################################################");
+        LOGGER.error("################################################");
+        LOGGER.error("################################################");
+        LOGGER.error("################################################");
+
         int port = Integer.parseInt(ciServerSshPort);
 
         JSch jsch = new JSch();
