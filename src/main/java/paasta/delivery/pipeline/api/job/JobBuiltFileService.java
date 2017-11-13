@@ -154,23 +154,9 @@ public class JobBuiltFileService {
 
 
     private Session procCreateJSchSession(String ciServerUrl) {
-        String host = ciServerUrl.replace("http://", "");
         String charSequence = ":";
-
-        LOGGER.error("################################################");
-        LOGGER.error("################################################");
-        LOGGER.error("################################################");
-        LOGGER.error("################################################");
-        LOGGER.error("###################### host BEFORE :: {}", host);
-
+        String host = ciServerUrl.replace("http://", "");
         host = (host.contains(charSequence)) ? host.split(charSequence)[0] : host;
-
-        LOGGER.error("###################### host AFTER :: {}", host);
-        LOGGER.error("################################################");
-        LOGGER.error("################################################");
-        LOGGER.error("################################################");
-        LOGGER.error("################################################");
-
         int port = Integer.parseInt(ciServerSshPort);
 
         JSch jsch = new JSch();
