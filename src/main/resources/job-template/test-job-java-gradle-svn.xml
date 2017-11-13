@@ -47,15 +47,14 @@
             <properties>sonar.projectName=@INSPECTION_PROJECT_NAME
 sonar.projectKey=@INSPECTION_PROJECT_KEY
 sonar.projectVersion=1.0
-sonar.sources=.
-sonar.working.directory=sonar
-sonar.junit.reportsPath=build/test-results/test
-sonar.jacoco.reportPath=build/jacoco/jacoco-overall.exec
-sonar.java.binaries=build/classes
+sonar.sources=src/main/java
+sonar.tests=src/test/java
+sonar.scm.provider=git
 sonar.svn.username=@SVN_USER_NAME
 sonar.svn.password.secured=@SVN_USER_PASSWORD
-sonar.scm.provider=svn
-sonar.scm.disabled=false</properties>
+sonar.junit.reportsPath=build/test-results/test
+sonar.jacoco.reportPath=build/jacoco/jacoco-overall.exec
+sonar.java.binaries=build/classes</properties>
             <javaOpts></javaOpts>
             <additionalArguments></additionalArguments>
             <jdk>(Inherit From Job)</jdk>

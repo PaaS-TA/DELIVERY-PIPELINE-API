@@ -53,15 +53,15 @@ public class Constants {
         /**
          * Svn scm plugin version plugin config.
          */
-        SVN_SCM_PLUGIN_VERSION("subversion@2.7.2"),
+        SVN_SCM_PLUGIN_VERSION("subversion@2.9"),
         /**
          * Gradle plugin version plugin config.
          */
-        GRADLE_PLUGIN_VERSION("gradle@1.26"),
+        GRADLE_PLUGIN_VERSION("gradle@1.28"),
         /**
          * Gradle name plugin config.
          */
-        GRADLE_NAME("gradle-3.5"),
+        GRADLE_NAME("gradle-3.5.1"),
         /**
          * Maven name plugin config.
          */

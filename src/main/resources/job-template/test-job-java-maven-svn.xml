@@ -43,15 +43,15 @@
             <properties>sonar.projectName=@INSPECTION_PROJECT_NAME
 sonar.projectKey=@INSPECTION_PROJECT_KEY
 sonar.projectVersion=1.0
-sonar.sources=src
-sonar.working.directory=sonar
-sonar.junit.reportsPath=target/surefire-reports
-sonar.jacoco.reportPath=target/jacoco.exec
-sonar.java.binaries=target/classes
+sonar.sources=src/main/java
+sonar.tests=src/test/java
+sonar.scm.forceReloadAll=true
+sonar.scm.provider=svn
 sonar.svn.username=@SVN_USER_NAME
 sonar.svn.password.secured=@SVN_USER_PASSWORD
-sonar.scm.provider=svn
-sonar.scm.disabled=false</properties>
+sonar.junit.reportsPath=target/surefire-reports
+sonar.jacoco.reportPath=target/jacoco-overall.exec
+sonar.java.binaries=target/classes</properties>
             <javaOpts></javaOpts>
             <additionalArguments></additionalArguments>
             <jdk>(Inherit From Job)</jdk>
