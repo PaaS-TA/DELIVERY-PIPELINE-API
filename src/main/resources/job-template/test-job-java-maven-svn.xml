@@ -3,7 +3,8 @@
     <actions/>
     <description></description>
     <keepDependencies>false</keepDependencies>
-    <scm class="hudson.scm.SubversionSCM" plugin="@SVN_SCM_PLUGIN_VERSION">
+    <properties/>
+    <scm class="hudson.scm.SubversionSCM" plugin="subversion@2.9">
         <locations>
             <hudson.scm.SubversionSCM_-ModuleLocation>
                 <remote>@REPOSITORY_URL</remote>
@@ -31,26 +32,25 @@
     <builders>
         <hudson.tasks.Maven>
             <targets>clean test org.jacoco:jacoco-maven-plugin:prepare-agent install</targets>
-            <mavenName>@MAVEN_NAME</mavenName>
+            <mavenName>maven-3.5</mavenName>
             <usePrivateRepository>false</usePrivateRepository>
             <settings class="jenkins.mvn.DefaultSettingsProvider"/>
             <globalSettings class="jenkins.mvn.DefaultGlobalSettingsProvider"/>
             <injectBuildVariables>false</injectBuildVariables>
         </hudson.tasks.Maven>
-        <hudson.plugins.sonar.SonarRunnerBuilder plugin="@SONAR_PLUGIN_VERSION">
-            <installationName>@SONAR_NAME</installationName>
+        <hudson.plugins.sonar.SonarRunnerBuilder plugin="sonar@2.6.1">
             <project></project>
             <properties>sonar.projectName=@INSPECTION_PROJECT_NAME
 sonar.projectKey=@INSPECTION_PROJECT_KEY
 sonar.projectVersion=1.0
 sonar.sources=src/main/java
 sonar.tests=src/test/java
-sonar.scm.forceReloadAll=true
 sonar.scm.provider=svn
 sonar.svn.username=@SVN_USER_NAME
 sonar.svn.password.secured=@SVN_USER_PASSWORD
+sonar.log.level=TRACE
 sonar.junit.reportsPath=target/surefire-reports
-sonar.jacoco.reportPath=target/jacoco-overall.exec
+sonar.jacoco.reportPath=target/jacoco.exec
 sonar.java.binaries=target/classes</properties>
             <javaOpts></javaOpts>
             <additionalArguments></additionalArguments>
@@ -58,6 +58,22 @@ sonar.java.binaries=target/classes</properties>
             <task></task>
         </hudson.plugins.sonar.SonarRunnerBuilder>
     </builders>
-    <publishers/>
+    <publishers>
+        <quality.gates.jenkins.plugin.QGPublisher plugin="quality-gates@2.5">
+            <jobConfigData>
+                <projectKey>@INSPECTION_PROJECT_KEY</projectKey>
+                <sonarInstanceName>sonarqube-5.6.7</sonarInstanceName>
+            </jobConfigData>
+            <buildDecision>
+                <qualityGatesProvider>
+                    <qualityGateResponseParser/>
+                    <sonarHttpRequester/>
+                    <sonarInstanceValidationService/>
+                </qualityGatesProvider>
+            </buildDecision>
+            <jobConfigurationService/>
+            <jobExecutionService/>
+        </quality.gates.jenkins.plugin.QGPublisher>
+    </publishers>
     <buildWrappers/>
 </project>
