@@ -4,6 +4,7 @@
 /build/
 /out/
 !gradle/wrapper/gradle-wrapper.jar
+src/test/resources/*.yml
 
 ### STS ###
 .apt_generated
@@ -26,3 +27,4 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+src/main/webapp/
