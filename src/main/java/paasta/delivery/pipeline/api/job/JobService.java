@@ -12,7 +12,6 @@ import paasta.delivery.pipeline.api.cf.info.CfInfoService;
 import paasta.delivery.pipeline.api.common.*;
 import paasta.delivery.pipeline.api.credential.CredentialsService;
 import paasta.delivery.pipeline.api.exception.TriggerException;
-import paasta.delivery.pipeline.api.inspection.InspectionProject;
 import paasta.delivery.pipeline.api.inspection.InspectionProjectService;
 import paasta.delivery.pipeline.api.job.config.JobConfig;
 import paasta.delivery.pipeline.api.job.template.JobTemplateService;
@@ -463,13 +462,19 @@ public class JobService {
         customJob.setRepositoryBranch(buildJobDetail.getRepositoryBranch());
         customJob.setRepositoryCommitRevision(buildJobDetail.getRepositoryCommitRevision());
 
-        // CREATE INSPECTION PROJECT TO INSPECTION API
-        InspectionProject resultInspectionProject = inspectionProjectService.createProject(customJob);
+        // TODO
+//        // CREATE INSPECTION PROJECT TO INSPECTION API
+//        InspectionProject resultInspectionProject = inspectionProjectService.createProject(customJob);
+//
+//        // SET PARAM :: INSPECTION VARIABLES
+//        customJob.setInspectionProjectId(resultInspectionProject.getId());
+//        customJob.setInspectionProjectName(resultInspectionProject.getName());
+//        customJob.setInspectionProjectKey(resultInspectionProject.getSonarKey());
 
         // SET PARAM :: INSPECTION VARIABLES
-        customJob.setInspectionProjectId(resultInspectionProject.getId());
-        customJob.setInspectionProjectName(resultInspectionProject.getName());
-        customJob.setInspectionProjectKey(resultInspectionProject.getSonarKey());
+        customJob.setInspectionProjectId(1);
+        customJob.setInspectionProjectName("rex-test-local");
+        customJob.setInspectionProjectKey("rex-test-local-key");
 
         // CREATE TEST JOB TO CI SERVER
         commonService.procGetCiServer(customJob.getCiServerUrl()).createJob(jobGuid, jobTemplateService.getTestJobTemplate(customJob), true);
@@ -496,8 +501,9 @@ public class JobService {
         // SET PARAM : UPDATE INSPECTION PROJECT TO INSPECTION API
         customJob.setId(resultModel.getId());
 
+        // TODO
         // UPDATE INSPECTION PROJECT TO INSPECTION API
-        inspectionProjectService.updateProject(customJob);
+//        inspectionProjectService.updateProject(customJob);
 
         resultModel.setJobGuid(jobGuid);
         return resultModel;
@@ -553,8 +559,9 @@ public class JobService {
         customJob.setInspectionProjectId(jobDetail.getInspectionProjectId());
         customJob.setInspectionProjectName(customJob.getPipelineName() + "_" + customJob.getJobName());
 
+        // TODO
         // UPDATE INSPECTION PROJECT TO INSPECTION API
-        inspectionProjectService.updateProject(customJob);
+//        inspectionProjectService.updateProject(customJob);
 
         return resultModel;
     }
