@@ -1,6 +1,5 @@
 package paasta.delivery.pipeline.api.job.template;
 
-import paasta.delivery.pipeline.api.common.Constants;
 import paasta.delivery.pipeline.api.job.CustomJob;
 
 import java.io.IOException;
@@ -31,9 +30,6 @@ class TestJobTemplate extends JobCommonTemplate {
 
         loadedJobTemplate = loadedJobTemplate.replace("@INSPECTION_PROJECT_NAME", customJob.getInspectionProjectName());
         loadedJobTemplate = loadedJobTemplate.replace("@INSPECTION_PROJECT_KEY", customJob.getInspectionProjectKey());
-
-        loadedJobTemplate = loadedJobTemplate.replace("@SONAR_PLUGIN_VERSION", Constants.PluginConfig.SONAR_PLUGIN_VERSION.getValue());
-        loadedJobTemplate = loadedJobTemplate.replace("@SONAR_NAME", Constants.PluginConfig.SONAR_NAME.getValue());
 
         return loadedJobTemplate;
     }

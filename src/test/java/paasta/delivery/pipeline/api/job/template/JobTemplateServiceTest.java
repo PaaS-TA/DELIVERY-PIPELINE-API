@@ -102,7 +102,7 @@ public class JobTemplateServiceTest {
     @Test
     public void getBuildTemplate_ValidParamJava_ReturnString() throws Exception {
         gTestJobModel.setBuilderType(String.valueOf(JobConfig.BuilderType.GRADLE));
-
+        gTestJobModel.setRepositoryType(String.valueOf(JobConfig.RepositoryType.SCM_GIT));
 
         // TEST
         String resultString = jobTemplateService.getBuildJobTemplate(gTestJobModel);

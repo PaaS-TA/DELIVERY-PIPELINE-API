@@ -1,7 +1,6 @@
 package paasta.delivery.pipeline.api.job.template;
 
 import org.apache.commons.io.FileUtils;
-import paasta.delivery.pipeline.api.common.Constants;
 import paasta.delivery.pipeline.api.job.CustomJob;
 import paasta.delivery.pipeline.api.job.config.JobConfig;
 
@@ -58,9 +57,6 @@ class JobCommonTemplate {
             classLoader = getClass().getClassLoader();
             templateFile = new File(classLoader.getResource(templateFilePath).getFile());
             loadedJobTemplate = FileUtils.readFileToString(templateFile, "UTF-8");
-
-            loadedJobTemplate = loadedJobTemplate.replace("@GRADLE_PLUGIN_VERSION", Constants.PluginConfig.GRADLE_PLUGIN_VERSION.getValue());
-            loadedJobTemplate = loadedJobTemplate.replace("@GRADLE_NAME", Constants.PluginConfig.GRADLE_NAME.getValue());
         }
 
         // CHECK BUILDER TYPE :: MAVEN
@@ -70,15 +66,10 @@ class JobCommonTemplate {
             classLoader = getClass().getClassLoader();
             templateFile = new File(classLoader.getResource(templateFilePath).getFile());
             loadedJobTemplate = FileUtils.readFileToString(templateFile, "UTF-8");
-
-            loadedJobTemplate = loadedJobTemplate.replace("@MAVEN_NAME", Constants.PluginConfig.MAVEN_NAME.getValue());
         }
 
         // CHECK REPOSITORY TYPE
-        if (String.valueOf(JobConfig.RepositoryType.SCM_SVN).equals(customJob.getRepositoryType())) {
-            loadedJobTemplate = loadedJobTemplate.replace("@SVN_SCM_PLUGIN_VERSION", Constants.PluginConfig.SVN_SCM_PLUGIN_VERSION.getValue());
-        } else {
-            loadedJobTemplate = loadedJobTemplate.replace("@SCM_GIT_PLUGIN_VERSION", Constants.PluginConfig.SCM_GIT_PLUGIN_VERSION.getValue());
+        if (String.valueOf(JobConfig.RepositoryType.SCM_GIT).equals(customJob.getRepositoryType())) {
             loadedJobTemplate = loadedJobTemplate.replace("@REPOSITORY_BRANCH", customJob.getRepositoryBranch());
         }
 
