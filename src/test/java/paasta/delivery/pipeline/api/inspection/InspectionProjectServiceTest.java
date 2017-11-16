@@ -69,7 +69,6 @@ public class InspectionProjectServiceTest {
         gTestInspectionProjectModel.setId(0);
         gTestInspectionProjectModel.setResultMessage("");
         gTestInspectionProjectModel.setBranch("");
-        gTestInspectionProjectModel.setLinked(false);
         gTestInspectionProjectModel.setGateId("");
         gTestInspectionProjectModel.setProfileKey("");
         gTestInspectionProjectModel.setProjectKey("");

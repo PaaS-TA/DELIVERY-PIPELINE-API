@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.when;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 
 /**
  * paastaDeliveryPipelineApi
@@ -1556,7 +1557,7 @@ public class JobServiceTest {
      * @throws Exception the exception
      */
     @Test
-    public void deleteJob_ValidJobId_invalidDeleteProject_ReturnModel() throws Exception {
+    public void deleteJob_ValidJobId_InvalidDeleteProject_ReturnModel() throws Exception {
         String reqUrl = REQ_PIPELINES_URL + PIPELINE_ID + REQ_URL;
 
         gTestResultJobModel.setJobType(String.valueOf(JobService.JobType.TEST));
@@ -2075,7 +2076,7 @@ public class JobServiceTest {
      * @throws Exception the exception
      */
     @Test
-    public void triggerJob_DEPLOY_dev_ValidModel_invalidFileId_ReturnModel() throws Exception {
+    public void triggerJob_DEPLOY_dev_ValidModel_InvalidFileId_ReturnModel() throws Exception {
         long buildJobId = 10L;
         long deployDetailJobId = 11L;
         long jobHistoryId = 0L;
@@ -2631,6 +2632,72 @@ public class JobServiceTest {
 
 
     /**
+     * Gets job log invalid model return null pointer exception.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void getJobLog_InvalidModel_ReturnNullPointerException() throws Exception {
+        int invalidJobNumber = 11;
+        gTestResultJobModel.setJobGuid(JOB_GUID);
+
+
+        // GET SERVICE INSTANCES DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
+        // GET JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestResultJobModel);
+        // GET CI SERVER
+        when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
+        // GET JOB DETAIL FROM CI SERVER
+        when(ciServer.getJob(JOB_GUID)).thenReturn(jobWithDetails);
+        // GET BUILD FROM CI SERVER
+        doThrow(NullPointerException.class).when(jobWithDetails).getBuildByNumber(invalidJobNumber);
+
+
+        // TEST
+        CustomJob resultModel = jobService.getJobLog(Math.toIntExact(JOB_ID), invalidJobNumber);
+
+        assertThat(resultModel).isNotNull();
+        assertEquals(JOB_GUID, resultModel.getJobGuid());
+        assertEquals(invalidJobNumber, resultModel.getJobNumber());
+        assertEquals(Constants.RESULT_STATUS_SUCCESS, resultModel.getResultStatus());
+    }
+
+
+    /**
+     * Gets job log invalid model return exception.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void getJobLog_InvalidModel_ReturnException() throws Exception {
+        int invalidJobNumber = 11;
+        gTestResultJobModel.setJobGuid(JOB_GUID);
+
+
+        // GET SERVICE INSTANCES DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
+        // GET JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestResultJobModel);
+        // GET CI SERVER
+        when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
+        // GET JOB DETAIL FROM CI SERVER
+        when(ciServer.getJob(JOB_GUID)).thenReturn(jobWithDetails);
+        // GET BUILD FROM CI SERVER
+        doThrow(Exception.class).when(jobWithDetails).getBuildByNumber(invalidJobNumber);
+
+
+        // TEST
+        CustomJob resultModel = jobService.getJobLog(Math.toIntExact(JOB_ID), invalidJobNumber);
+
+        assertThat(resultModel).isNotNull();
+        assertEquals(JOB_GUID, resultModel.getJobGuid());
+        assertEquals(invalidJobNumber, resultModel.getJobNumber());
+        assertEquals(Constants.RESULT_STATUS_SUCCESS, resultModel.getResultStatus());
+    }
+
+
+    /**
      * Gets job status valid model return model.
      *
      * @throws Exception the exception
@@ -2700,6 +2767,39 @@ public class JobServiceTest {
         assertEquals(JOB_GUID, resultModel.getJobGuid());
         assertEquals(JOB_NUMBER, resultModel.getJobNumber());
         assertEquals("false", resultModel.getIsBuilding());
+        assertEquals(Constants.RESULT_STATUS_SUCCESS, resultModel.getResultStatus());
+    }
+
+
+    /**
+     * Gets job status invalid model return model.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void getJobStatus_InvalidModel_ReturnModel() throws Exception {
+        int invalidJobNumber = 11;
+        gTestResultJobModel.setJobGuid(JOB_GUID);
+
+
+        // GET SERVICE INSTANCES DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + gTestJobModel.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class)).thenReturn(gTestServiceInstancesModel);
+        // GET JOB DETAIL FROM DATABASE
+        when(restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + JOB_ID, HttpMethod.GET, null, CustomJob.class)).thenReturn(gTestResultJobModel);
+        // GET CI SERVER
+        when(commonService.procGetCiServer(CI_SERVER_URL)).thenReturn(ciServer);
+        // GET JOB DETAIL FROM CI SERVER
+        when(ciServer.getJob(JOB_GUID)).thenReturn(jobWithDetails);
+        // GET BUILD FROM CI SERVER
+        doThrow(Exception.class).when(jobWithDetails).getBuildByNumber(invalidJobNumber);
+
+
+        // TEST
+        CustomJob resultModel = jobService.getJobStatus(Math.toIntExact(JOB_ID), invalidJobNumber);
+
+        assertThat(resultModel).isNotNull();
+        assertEquals(JOB_GUID, resultModel.getJobGuid());
+        assertEquals(invalidJobNumber, resultModel.getJobNumber());
         assertEquals(Constants.RESULT_STATUS_SUCCESS, resultModel.getResultStatus());
     }
 
