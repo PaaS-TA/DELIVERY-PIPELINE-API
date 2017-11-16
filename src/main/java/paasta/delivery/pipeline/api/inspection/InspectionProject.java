@@ -21,19 +21,12 @@ public class InspectionProject {
     private String projectKey;  //자동생성 uuid
     private String qualityProfileKey;
     private long qualityGateId;
-    private String created;
-    private String lastModified;
-    private String createdString;
-    private String lastModifiedString;
     // DATABASE COLUMNS :: END
 
     private String qualifier;
     private String resultStatus;
     private String resultMessage;
     private String branch;
-
-    //프로젝트와 게이트, 프로파일 연결 상태
-    private boolean linked;
 
     //sona에서 사용하는 id(gate)
     private String gateId;
@@ -57,10 +50,6 @@ public class InspectionProject {
     private List sources;
     private List scm;
     private List issues;
-
-    //프로젝트 추가, 수정시 게이트와 프로파일 default 상태
-    private String gateDefaultYn;
-    private String profileDefaultYn;
 
     public long getId() {
         return id;
@@ -134,38 +123,6 @@ public class InspectionProject {
         this.qualityGateId = qualityGateId;
     }
 
-    public String getCreated() {
-        return created;
-    }
-
-    public void setCreated(String created) {
-        this.created = created;
-    }
-
-    public String getLastModified() {
-        return lastModified;
-    }
-
-    public void setLastModified(String lastModified) {
-        this.lastModified = lastModified;
-    }
-
-    public String getCreatedString() {
-        return createdString;
-    }
-
-    public void setCreatedString(String createdString) {
-        this.createdString = createdString;
-    }
-
-    public String getLastModifiedString() {
-        return lastModifiedString;
-    }
-
-    public void setLastModifiedString(String lastModifiedString) {
-        this.lastModifiedString = lastModifiedString;
-    }
-
     public String getQualifier() {
         return qualifier;
     }
@@ -196,14 +153,6 @@ public class InspectionProject {
 
     public void setBranch(String branch) {
         this.branch = branch;
-    }
-
-    public boolean isLinked() {
-        return linked;
-    }
-
-    public void setLinked(boolean linked) {
-        this.linked = linked;
     }
 
     public String getGateId() {
@@ -308,22 +257,6 @@ public class InspectionProject {
 
     public void setIssues(List issues) {
         this.issues = issues;
-    }
-
-    public String getGateDefaultYn() {
-        return gateDefaultYn;
-    }
-
-    public void setGateDefaultYn(String gateDefaultYn) {
-        this.gateDefaultYn = gateDefaultYn;
-    }
-
-    public String getProfileDefaultYn() {
-        return profileDefaultYn;
-    }
-
-    public void setProfileDefaultYn(String profileDefaultYn) {
-        this.profileDefaultYn = profileDefaultYn;
     }
 
 }
