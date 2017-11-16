@@ -35,7 +35,7 @@ public class InspectionProjectServiceTest {
     private static final long PIPELINE_ID = 1L;
     private static final String PIPELINE_NAME = "test-pipeline-name";
     private static final String JOB_NAME = "test-job-name";
-    private static final String SONAR_KEY = "test-sonar-key";
+    private static final String QUALITY_PROFILE_KEY = "test-quality-profile-key";
 
     private static InspectionProject gTestResultInspectionProjectModel = null;
     private static CustomJob gTestJobModel = null;
@@ -58,27 +58,19 @@ public class InspectionProjectServiceTest {
         gTestResultInspectionProjectModel = new InspectionProject();
         gTestJobModel = new CustomJob();
 
-        gTestInspectionProjectModel.setKey(SONAR_KEY);
         gTestInspectionProjectModel.setQualifier("");
-        gTestInspectionProjectModel.setOrgName("");
-        gTestInspectionProjectModel.setOrgGuid("");
         gTestInspectionProjectModel.setServiceInstancesId(SERVICE_INSTANCES_ID);
         gTestInspectionProjectModel.setPipelineId((int) PIPELINE_ID);
         gTestInspectionProjectModel.setJobId(0L);
-        gTestInspectionProjectModel.setName(PIPELINE_NAME + "_" + JOB_NAME);
-        gTestInspectionProjectModel.setQualityProfileId(1);
+        gTestInspectionProjectModel.setQualityProfileKey(QUALITY_PROFILE_KEY);
         gTestInspectionProjectModel.setQualityGateId(1);
         gTestInspectionProjectModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
 
         gTestInspectionProjectModel.setId(0);
-        gTestInspectionProjectModel.setSonarKey("");
-        gTestInspectionProjectModel.setUserName("");
-        gTestInspectionProjectModel.setUserGuid("");
         gTestInspectionProjectModel.setResultMessage("");
         gTestInspectionProjectModel.setBranch("");
         gTestInspectionProjectModel.setLinked(false);
         gTestInspectionProjectModel.setGateId("");
-        gTestInspectionProjectModel.setProjectId("");
         gTestInspectionProjectModel.setProfileKey("");
         gTestInspectionProjectModel.setProjectKey("");
         gTestInspectionProjectModel.setMeasures("");
@@ -94,25 +86,17 @@ public class InspectionProjectServiceTest {
         gTestInspectionProjectModel.setScm(null);
         gTestInspectionProjectModel.setIssues(null);
 
-        gTestResultInspectionProjectModel.setKey(gTestInspectionProjectModel.getKey());
         gTestResultInspectionProjectModel.setQualifier(gTestInspectionProjectModel.getQualifier());
-        gTestResultInspectionProjectModel.setOrgName(gTestInspectionProjectModel.getOrgName());
-        gTestResultInspectionProjectModel.setOrgGuid(gTestInspectionProjectModel.getOrgGuid());
         gTestResultInspectionProjectModel.setServiceInstancesId(gTestInspectionProjectModel.getServiceInstancesId());
         gTestResultInspectionProjectModel.setPipelineId(gTestInspectionProjectModel.getPipelineId());
         gTestResultInspectionProjectModel.setJobId(gTestInspectionProjectModel.getJobId());
-        gTestResultInspectionProjectModel.setName(gTestInspectionProjectModel.getName());
-        gTestResultInspectionProjectModel.setQualityProfileId(gTestInspectionProjectModel.getQualityProfileId());
+        gTestResultInspectionProjectModel.setQualityProfileKey(gTestInspectionProjectModel.getQualityProfileKey());
         gTestResultInspectionProjectModel.setQualityGateId(gTestInspectionProjectModel.getQualityGateId());
         gTestResultInspectionProjectModel.setResultStatus(gTestInspectionProjectModel.getResultStatus());
 
         gTestResultInspectionProjectModel.setId(gTestInspectionProjectModel.getId());
-        gTestResultInspectionProjectModel.setSonarKey(gTestInspectionProjectModel.getSonarKey());
-        gTestResultInspectionProjectModel.setUserName(gTestInspectionProjectModel.getUserName());
-        gTestResultInspectionProjectModel.setUserGuid(gTestInspectionProjectModel.getUserGuid());
         gTestResultInspectionProjectModel.setResultMessage(gTestInspectionProjectModel.getResultMessage());
         gTestResultInspectionProjectModel.setBranch(gTestInspectionProjectModel.getBranch());
-        gTestResultInspectionProjectModel.setLinked(gTestInspectionProjectModel.getLinked());
         gTestResultInspectionProjectModel.setGateId(gTestInspectionProjectModel.getGateId());
         gTestResultInspectionProjectModel.setProjectId(gTestInspectionProjectModel.getProjectId());
         gTestResultInspectionProjectModel.setProfileKey(gTestInspectionProjectModel.getProfileKey());
@@ -135,7 +119,7 @@ public class InspectionProjectServiceTest {
         gTestJobModel.setId(0L);
         gTestJobModel.setPipelineName(PIPELINE_NAME);
         gTestJobModel.setJobName(JOB_NAME);
-        gTestJobModel.setInspectionProfileId(1);
+        gTestJobModel.setInspectionProfileKey(QUALITY_PROFILE_KEY);
         gTestJobModel.setInspectionGateId(1);
     }
 

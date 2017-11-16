@@ -84,7 +84,7 @@ public class JobServiceTest {
     private static final String BUILDER_LANGUAGE = "java_buildpack_offline";
     private static final String INSPECTION_PROJECT_NAME = "test-inspection-project-name";
     private static final String INSPECTION_PROJECT_KEY = "test-inspection-project-key";
-    private static final String SONAR_KEY = "test-sonar-key";
+    private static final String QUALITY_PROFILE_KEY = "test-quality-profile-key";
 
     private static CustomJob gTestJobModel = null;
     private static CustomJob gTestJobDetailModel = null;
@@ -218,7 +218,7 @@ public class JobServiceTest {
         gTestResultJobModel.setBlueGreenDeployStatus(String.valueOf(JobConfig.BlueGreenDeployStatus.GREEN_DEPLOY));
         gTestResultJobModel.setManifestScript("");
         gTestResultJobModel.setInspectionProjectId(0);
-        gTestResultJobModel.setInspectionProfileId(0);
+        gTestResultJobModel.setInspectionProfileKey(QUALITY_PROFILE_KEY);
         gTestResultJobModel.setInspectionGateId(0);
         gTestResultJobModel.setCreated("");
         gTestResultJobModel.setLastModified("");
@@ -253,13 +253,10 @@ public class JobServiceTest {
         gTestInspectionProjectModel.setServiceInstancesId(SERVICE_INSTANCES_ID);
         gTestInspectionProjectModel.setPipelineId((int) PIPELINE_ID);
         gTestInspectionProjectModel.setJobId(0L);
-        gTestInspectionProjectModel.setName(PIPELINE_NAME + "_" + JOB_NAME);
-        gTestInspectionProjectModel.setQualityProfileId(1);
+        gTestInspectionProjectModel.setQualityProfileKey(QUALITY_PROFILE_KEY);
         gTestInspectionProjectModel.setQualityGateId(1);
 
         gTestResultInspectionProjectModel.setId(1);
-        gTestResultInspectionProjectModel.setName(INSPECTION_PROJECT_NAME);
-        gTestResultInspectionProjectModel.setSonarKey(SONAR_KEY);
 
         gTestResultMap.put("id", JOB_ID_IN_MAP);
         gTestResultMap.put("serviceInstancesId", SERVICE_INSTANCES_ID);
@@ -1189,7 +1186,7 @@ public class JobServiceTest {
         gTestJobModel.setBuildJobId(JOB_ID);
         gTestJobModel.setJobName(JOB_NAME);
         gTestJobModel.setPipelineName(PIPELINE_NAME);
-        gTestJobModel.setInspectionProfileId(1);
+        gTestJobModel.setInspectionProfileKey(QUALITY_PROFILE_KEY);
         gTestJobModel.setInspectionGateId(1);
 
         gTestJobDetailModel.setBuilderType(String.valueOf(JobConfig.BuilderType.GRADLE));
@@ -1425,7 +1422,7 @@ public class JobServiceTest {
         assertEquals(gTestResultJobModel.getAppUrl(), resultModel.getAppUrl());
         assertEquals(gTestResultJobModel.getManifestScript(), resultModel.getManifestScript());
         assertEquals(gTestResultJobModel.getInspectionProjectId(), resultModel.getInspectionProjectId());
-        assertEquals(gTestResultJobModel.getInspectionProfileId(), resultModel.getInspectionProfileId());
+        assertEquals(gTestResultJobModel.getInspectionProfileKey(), resultModel.getInspectionProfileKey());
         assertEquals(gTestResultJobModel.getInspectionGateId(), resultModel.getInspectionGateId());
         assertEquals(gTestResultJobModel.getCreated(), resultModel.getCreated());
         assertEquals(gTestResultJobModel.getLastModified(), resultModel.getLastModified());
@@ -1491,7 +1488,7 @@ public class JobServiceTest {
         assertEquals(gTestResultJobModel.getAppUrl(), resultModel.getAppUrl());
         assertEquals(gTestResultJobModel.getManifestScript(), resultModel.getManifestScript());
         assertEquals(gTestResultJobModel.getInspectionProjectId(), resultModel.getInspectionProjectId());
-        assertEquals(gTestResultJobModel.getInspectionProfileId(), resultModel.getInspectionProfileId());
+        assertEquals(gTestResultJobModel.getInspectionProfileKey(), resultModel.getInspectionProfileKey());
         assertEquals(gTestResultJobModel.getInspectionGateId(), resultModel.getInspectionGateId());
         assertEquals(gTestResultJobModel.getCreated(), resultModel.getCreated());
         assertEquals(gTestResultJobModel.getLastModified(), resultModel.getLastModified());
