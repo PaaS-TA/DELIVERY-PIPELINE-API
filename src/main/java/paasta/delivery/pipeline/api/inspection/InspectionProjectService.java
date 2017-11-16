@@ -38,9 +38,8 @@ public class InspectionProjectService {
         // SET PARAM :: CREATE INSPECTION PROJECT TO INSPECTION API
         inspectionProject.setServiceInstancesId(customJob.getServiceInstancesId());
         inspectionProject.setPipelineId((int) customJob.getPipelineId());
-        inspectionProject.setJobId(0L);
-        inspectionProject.setName(customJob.getPipelineName() + "_" + customJob.getJobName());
-        inspectionProject.setQualityProfileId(customJob.getInspectionProfileId());
+        inspectionProject.setJobId(0);
+        inspectionProject.setQualityProfileKey(customJob.getInspectionProfileKey());
         inspectionProject.setQualityGateId(customJob.getInspectionGateId());
 
         // CREATE INSPECTION PROJECT TO INSPECTION API
@@ -59,11 +58,8 @@ public class InspectionProjectService {
 
         // SET PARAM : UPDATE INSPECTION PROJECT TO INSPECTION API
         inspectionProject.setId(customJob.getInspectionProjectId());
-        inspectionProject.setServiceInstancesId(customJob.getServiceInstancesId());
-        inspectionProject.setPipelineId((int) customJob.getPipelineId());
         inspectionProject.setJobId(customJob.getId());
-        inspectionProject.setName(customJob.getInspectionProjectName());
-        inspectionProject.setQualityProfileId(customJob.getInspectionProfileId());
+        inspectionProject.setQualityProfileKey(customJob.getInspectionProfileKey());
         inspectionProject.setQualityGateId(customJob.getInspectionGateId());
 
         return restTemplateService.send(Constants.TARGET_INSPECTION_API, REQ_URL + "/projectsUpdate", HttpMethod.POST, inspectionProject, InspectionProject.class);
@@ -81,7 +77,7 @@ public class InspectionProjectService {
 
         // SET PARAM : DELETE INSPECTION PROJECT TO INSPECTION API
         inspectionProject.setId(customJob.getInspectionProjectId());
-        inspectionProject.setKey(customJob.getInspectionProjectKey());
+        inspectionProject.setProjectKey(customJob.getInspectionProjectKey());
 
         return restTemplateService.send(Constants.TARGET_INSPECTION_API, REQ_URL + "/projectsDelete", HttpMethod.POST, inspectionProject, InspectionProject.class);
     }

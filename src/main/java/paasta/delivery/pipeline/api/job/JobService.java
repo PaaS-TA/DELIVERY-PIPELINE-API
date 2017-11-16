@@ -12,6 +12,7 @@ import paasta.delivery.pipeline.api.cf.info.CfInfoService;
 import paasta.delivery.pipeline.api.common.*;
 import paasta.delivery.pipeline.api.credential.CredentialsService;
 import paasta.delivery.pipeline.api.exception.TriggerException;
+import paasta.delivery.pipeline.api.inspection.InspectionProject;
 import paasta.delivery.pipeline.api.inspection.InspectionProjectService;
 import paasta.delivery.pipeline.api.job.config.JobConfig;
 import paasta.delivery.pipeline.api.job.template.JobTemplateService;
@@ -462,19 +463,17 @@ public class JobService {
         customJob.setRepositoryBranch(buildJobDetail.getRepositoryBranch());
         customJob.setRepositoryCommitRevision(buildJobDetail.getRepositoryCommitRevision());
 
-        // TODO
-//        // CREATE INSPECTION PROJECT TO INSPECTION API
-//        InspectionProject resultInspectionProject = inspectionProjectService.createProject(customJob);
-//
-//        // SET PARAM :: INSPECTION VARIABLES
-//        customJob.setInspectionProjectId(resultInspectionProject.getId());
-//        customJob.setInspectionProjectName(resultInspectionProject.getName());
-//        customJob.setInspectionProjectKey(resultInspectionProject.getSonarKey());
+        // TODO :: TO BE DELETED AFTER TEST
+        customJob.setInspectionProfileKey("java-egov-qualityprofile-20090");
+        customJob.setInspectionGateId(2);
+
+        // CREATE INSPECTION PROJECT TO INSPECTION API
+        InspectionProject resultInspectionProject = inspectionProjectService.createProject(customJob);
 
         // SET PARAM :: INSPECTION VARIABLES
-        customJob.setInspectionProjectId(1);
-        customJob.setInspectionProjectName("rex-test-local");
-        customJob.setInspectionProjectKey("rex-test-local-key");
+        customJob.setInspectionProjectId(resultInspectionProject.getId());
+        customJob.setInspectionProjectName(resultInspectionProject.getProjectName());
+        customJob.setInspectionProjectKey(resultInspectionProject.getProjectKey());
 
         // CREATE TEST JOB TO CI SERVER
         commonService.procGetCiServer(customJob.getCiServerUrl()).createJob(jobGuid, jobTemplateService.getTestJobTemplate(customJob), true);
@@ -501,9 +500,8 @@ public class JobService {
         // SET PARAM : UPDATE INSPECTION PROJECT TO INSPECTION API
         customJob.setId(resultModel.getId());
 
-        // TODO
         // UPDATE INSPECTION PROJECT TO INSPECTION API
-//        inspectionProjectService.updateProject(customJob);
+        inspectionProjectService.updateProject(customJob);
 
         resultModel.setJobGuid(jobGuid);
         return resultModel;
@@ -552,16 +550,18 @@ public class JobService {
         // SET REPOSITORY ACCOUNT PASSWORD BY AES256
         customJob.setRepositoryAccountPassword(commonService.setPasswordByAES256(Constants.AES256Type.ENCODE, repositoryAccountPassword));
 
+        // SET PARAM : UPDATE INSPECTION PROJECT TO INSPECTION API
+        customJob.setInspectionProjectId(jobDetail.getInspectionProjectId());
+
+        // TODO :: TO BE DELETED AFTER TEST
+        customJob.setInspectionProfileKey("java-sonar-way-87983");
+        customJob.setInspectionGateId(3);
+
         // UPDATE TEST JOB TO DATABASE
         resultModel = procUpdateJobToDb(customJob);
 
-        // SET PARAM : UPDATE INSPECTION PROJECT TO INSPECTION API
-        customJob.setInspectionProjectId(jobDetail.getInspectionProjectId());
-        customJob.setInspectionProjectName(customJob.getPipelineName() + "_" + customJob.getJobName());
-
-        // TODO
         // UPDATE INSPECTION PROJECT TO INSPECTION API
-//        inspectionProjectService.updateProject(customJob);
+        inspectionProjectService.updateProject(customJob);
 
         return resultModel;
     }
