@@ -11,43 +11,39 @@ import java.util.List;
  * @since 10/11/2017
  */
 public class InspectionProject {
-
-    private long id;
-    private String name;
-    private String key;
-
-    //자동생성 uuid
-    private String sonarKey;
+    // DATABASE COLUMNS :: BEGIN
+    private long id; // pid
+    private String serviceInstancesId;
+    private long pipelineId;
+    private long jobId;
+    private long projectId; // id -> projectId
+    private String projectName;
+    private String projectKey;  //자동생성 uuid
+    private String qualityProfileKey;
+    private long qualityGateId;
+    private String created;
+    private String lastModified;
+    private String createdString;
+    private String lastModifiedString;
+    // DATABASE COLUMNS :: END
 
     private String qualifier;
-    private String orgName;
-    private String orgGuid;
-    private String userName;
-    private String userGuid;
-    private int qualityProfileId;
-    private int qualityGateId;
     private String resultStatus;
     private String resultMessage;
     private String branch;
-    private String serviceInstancesId;
-    private int pipelineId;
-    private long jobId;
 
     //프로젝트와 게이트, 프로파일 연결 상태
-    private Boolean linked;
+    private boolean linked;
 
     //sona에서 사용하는 id(gate)
     private String gateId;
-    private String projectId;
 
     //sonar에서 사용하는 id(profile)
     private String profileKey;
-    private String projectKey;
 
     //품질관리 대시보드
     private Object measures;
     private String uuid;
-    private String projectName;
 
     //품질관리 커버리지
     private String resource;
@@ -62,6 +58,10 @@ public class InspectionProject {
     private List scm;
     private List issues;
 
+    //프로젝트 추가, 수정시 게이트와 프로파일 default 상태
+    private String gateDefaultYn;
+    private String profileDefaultYn;
+
     public long getId() {
         return id;
     }
@@ -70,28 +70,100 @@ public class InspectionProject {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getServiceInstancesId() {
+        return serviceInstancesId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setServiceInstancesId(String serviceInstancesId) {
+        this.serviceInstancesId = serviceInstancesId;
     }
 
-    public String getKey() {
-        return key;
+    public long getPipelineId() {
+        return pipelineId;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setPipelineId(long pipelineId) {
+        this.pipelineId = pipelineId;
     }
 
-    public String getSonarKey() {
-        return sonarKey;
+    public long getJobId() {
+        return jobId;
     }
 
-    public void setSonarKey(String sonarKey) {
-        this.sonarKey = sonarKey;
+    public void setJobId(long jobId) {
+        this.jobId = jobId;
+    }
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    public String getProjectKey() {
+        return projectKey;
+    }
+
+    public void setProjectKey(String projectKey) {
+        this.projectKey = projectKey;
+    }
+
+    public String getQualityProfileKey() {
+        return qualityProfileKey;
+    }
+
+    public void setQualityProfileKey(String qualityProfileKey) {
+        this.qualityProfileKey = qualityProfileKey;
+    }
+
+    public long getQualityGateId() {
+        return qualityGateId;
+    }
+
+    public void setQualityGateId(long qualityGateId) {
+        this.qualityGateId = qualityGateId;
+    }
+
+    public String getCreated() {
+        return created;
+    }
+
+    public void setCreated(String created) {
+        this.created = created;
+    }
+
+    public String getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(String lastModified) {
+        this.lastModified = lastModified;
+    }
+
+    public String getCreatedString() {
+        return createdString;
+    }
+
+    public void setCreatedString(String createdString) {
+        this.createdString = createdString;
+    }
+
+    public String getLastModifiedString() {
+        return lastModifiedString;
+    }
+
+    public void setLastModifiedString(String lastModifiedString) {
+        this.lastModifiedString = lastModifiedString;
     }
 
     public String getQualifier() {
@@ -100,54 +172,6 @@ public class InspectionProject {
 
     public void setQualifier(String qualifier) {
         this.qualifier = qualifier;
-    }
-
-    public String getOrgName() {
-        return orgName;
-    }
-
-    public void setOrgName(String orgName) {
-        this.orgName = orgName;
-    }
-
-    public String getOrgGuid() {
-        return orgGuid;
-    }
-
-    public void setOrgGuid(String orgGuid) {
-        this.orgGuid = orgGuid;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getUserGuid() {
-        return userGuid;
-    }
-
-    public void setUserGuid(String userGuid) {
-        this.userGuid = userGuid;
-    }
-
-    public int getQualityProfileId() {
-        return qualityProfileId;
-    }
-
-    public void setQualityProfileId(int qualityProfileId) {
-        this.qualityProfileId = qualityProfileId;
-    }
-
-    public int getQualityGateId() {
-        return qualityGateId;
-    }
-
-    public void setQualityGateId(int qualityGateId) {
-        this.qualityGateId = qualityGateId;
     }
 
     public String getResultStatus() {
@@ -174,35 +198,11 @@ public class InspectionProject {
         this.branch = branch;
     }
 
-    public String getServiceInstancesId() {
-        return serviceInstancesId;
-    }
-
-    public void setServiceInstancesId(String serviceInstancesId) {
-        this.serviceInstancesId = serviceInstancesId;
-    }
-
-    public int getPipelineId() {
-        return pipelineId;
-    }
-
-    public void setPipelineId(int pipelineId) {
-        this.pipelineId = pipelineId;
-    }
-
-    public long getJobId() {
-        return jobId;
-    }
-
-    public void setJobId(long jobId) {
-        this.jobId = jobId;
-    }
-
-    public Boolean getLinked() {
+    public boolean isLinked() {
         return linked;
     }
 
-    public void setLinked(Boolean linked) {
+    public void setLinked(boolean linked) {
         this.linked = linked;
     }
 
@@ -214,28 +214,12 @@ public class InspectionProject {
         this.gateId = gateId;
     }
 
-    public String getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
-    }
-
     public String getProfileKey() {
         return profileKey;
     }
 
     public void setProfileKey(String profileKey) {
         this.profileKey = profileKey;
-    }
-
-    public String getProjectKey() {
-        return projectKey;
-    }
-
-    public void setProjectKey(String projectKey) {
-        this.projectKey = projectKey;
     }
 
     public Object getMeasures() {
@@ -252,14 +236,6 @@ public class InspectionProject {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
-    }
-
-    public String getProjectName() {
-        return projectName;
-    }
-
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
     }
 
     public String getResource() {
@@ -332,6 +308,22 @@ public class InspectionProject {
 
     public void setIssues(List issues) {
         this.issues = issues;
+    }
+
+    public String getGateDefaultYn() {
+        return gateDefaultYn;
+    }
+
+    public void setGateDefaultYn(String gateDefaultYn) {
+        this.gateDefaultYn = gateDefaultYn;
+    }
+
+    public String getProfileDefaultYn() {
+        return profileDefaultYn;
+    }
+
+    public void setProfileDefaultYn(String profileDefaultYn) {
+        this.profileDefaultYn = profileDefaultYn;
     }
 
 }

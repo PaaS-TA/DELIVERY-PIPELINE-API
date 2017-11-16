@@ -41,7 +41,7 @@ public class CustomJob {
     private String manifestScript;
     private long inspectionProjectId;
     private String inspectionProjectKey;
-    private int inspectionProfileId;
+    private String inspectionProfileKey;
     private int inspectionGateId;
     private String userId;
     private String created;
@@ -321,12 +321,12 @@ public class CustomJob {
         this.inspectionProjectKey = inspectionProjectKey;
     }
 
-    public int getInspectionProfileId() {
-        return inspectionProfileId;
+    public String getInspectionProfileKey() {
+        return inspectionProfileKey;
     }
 
-    public void setInspectionProfileId(int inspectionProfileId) {
-        this.inspectionProfileId = inspectionProfileId;
+    public void setInspectionProfileKey(String inspectionProfileKey) {
+        this.inspectionProfileKey = inspectionProfileKey;
     }
 
     public int getInspectionGateId() {
