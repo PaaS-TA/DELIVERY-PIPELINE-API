@@ -180,6 +180,7 @@ public class JobServiceTest {
         gTestJobDetailModel.setId(JOB_ID);
         gTestJobDetailModel.setGroupOrder(1);
         gTestJobDetailModel.setJobOrder(1);
+        gTestJobDetailModel.setPipelineName(gTestJobModel.getPipelineName());
         gTestJobDetailModel.setBuilderType(String.valueOf(JobConfig.BuilderType.GRADLE));
         gTestJobDetailModel.setRepositoryType(String.valueOf(JobConfig.RepositoryType.SCM_GIT));
         gTestJobDetailModel.setRepositoryUrl(REPOSITORY_URL);

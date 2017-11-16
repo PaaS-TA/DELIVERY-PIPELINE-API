@@ -13,8 +13,8 @@ import java.util.List;
 public class InspectionProject {
     // DATABASE COLUMNS :: BEGIN
     private long id; // pid
-    private String serviceInstancesId;
     private long pipelineId;
+    private String serviceInstancesId;
     private long jobId;
     private long projectId; // id -> projectId
     private String projectName;
@@ -59,20 +59,20 @@ public class InspectionProject {
         this.id = id;
     }
 
-    public String getServiceInstancesId() {
-        return serviceInstancesId;
-    }
-
-    public void setServiceInstancesId(String serviceInstancesId) {
-        this.serviceInstancesId = serviceInstancesId;
-    }
-
     public long getPipelineId() {
         return pipelineId;
     }
 
     public void setPipelineId(long pipelineId) {
         this.pipelineId = pipelineId;
+    }
+
+    public String getServiceInstancesId() {
+        return serviceInstancesId;
+    }
+
+    public void setServiceInstancesId(String serviceInstancesId) {
+        this.serviceInstancesId = serviceInstancesId;
     }
 
     public long getJobId() {
