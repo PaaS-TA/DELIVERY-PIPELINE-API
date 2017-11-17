@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
 import paasta.delivery.pipeline.api.common.*;
 import paasta.delivery.pipeline.api.job.config.JobConfig;
 
@@ -94,7 +95,12 @@ public class JobBuiltFileService {
      */
     CustomJob setBuiltFile(CustomJob customJob) throws IOException, JSchException {
         CustomJob resultModel = new CustomJob();
-        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        FileInfo fileInfo = new FileInfo();
+        FileInfo resultFileInfoModel = new FileInfo();
+
+        resultModel.setResultStatus(Constants.RESULT_STATUS_FAIL);
+        fileInfo.setResultStatus(Constants.RESULT_STATUS_FAIL);
+        resultFileInfoModel.setId(0);
 
         ByteArrayResource byteArrayResource;
 
@@ -103,13 +109,20 @@ public class JobBuiltFileService {
         customJob.setBuilderType(tempResultModel.getBuilderType());
         byteArrayResource = procGetBuiltFileByteArrayResourceForJava(customJob);
 
-        // SEND FILE TO BINARY STORAGE API
-        FileInfo fileInfo = restTemplateService.sendMultipart(Constants.TARGET_BINARY_STORAGE_API, REQ_FILE_URL + "/uploadFile", byteArrayResource, FileInfo.class);
+        try {
+            // SEND FILE TO BINARY STORAGE API
+            fileInfo = restTemplateService.sendMultipart(Constants.TARGET_BINARY_STORAGE_API, REQ_FILE_URL + "/uploadFile", byteArrayResource, FileInfo.class);
+        } catch (HttpServerErrorException e) {
+            LOGGER.error("HttpServerErrorException :: {}", e);
+        }
 
-        // INSERT FILE INFO TO DATABASE
-        FileInfo resultFileInfoModel = restTemplateService.send(Constants.TARGET_COMMON_API, REQ_FILE_URL + "/upload", HttpMethod.POST, fileInfo, FileInfo.class);
+        if (Constants.RESULT_STATUS_SUCCESS.equals(fileInfo.getResultStatus())) {
+            // INSERT FILE INFO TO DATABASE
+            resultFileInfoModel = restTemplateService.send(Constants.TARGET_COMMON_API, REQ_FILE_URL + "/upload", HttpMethod.POST, fileInfo, FileInfo.class);
+            resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
+        }
+
         resultModel.setFileId(resultFileInfoModel.getId());
-        resultModel.setResultStatus(Constants.RESULT_STATUS_SUCCESS);
 
         return resultModel;
     }

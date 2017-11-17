@@ -554,7 +554,7 @@ public class JobService {
         customJob.setInspectionProjectId(jobDetail.getInspectionProjectId());
 
         // TODO :: TO BE DELETED AFTER TEST
-        customJob.setInspectionProfileKey("java-sonar-way-87983");
+        customJob.setInspectionProfileKey("java-rex-test-001-86284");
         customJob.setInspectionGateId(3);
 
         // UPDATE TEST JOB TO DATABASE
