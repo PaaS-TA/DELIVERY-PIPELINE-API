@@ -463,10 +463,6 @@ public class JobService {
         customJob.setRepositoryBranch(buildJobDetail.getRepositoryBranch());
         customJob.setRepositoryCommitRevision(buildJobDetail.getRepositoryCommitRevision());
 
-        // TODO :: TO BE DELETED AFTER TEST
-        customJob.setInspectionProfileKey("java-egov-qualityprofile-20090");
-        customJob.setInspectionGateId(2);
-
         // CREATE INSPECTION PROJECT TO INSPECTION API
         InspectionProject resultInspectionProject = inspectionProjectService.createProject(customJob);
 
@@ -552,10 +548,6 @@ public class JobService {
 
         // SET PARAM : UPDATE INSPECTION PROJECT TO INSPECTION API
         customJob.setInspectionProjectId(jobDetail.getInspectionProjectId());
-
-        // TODO :: TO BE DELETED AFTER TEST
-        customJob.setInspectionProfileKey("java-rex-test-001-86284");
-        customJob.setInspectionGateId(3);
 
         // UPDATE TEST JOB TO DATABASE
         resultModel = procUpdateJobToDb(customJob);
