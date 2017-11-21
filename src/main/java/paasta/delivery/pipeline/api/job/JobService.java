@@ -422,6 +422,7 @@ public class JobService {
             if (JOB_TYPE_TEST.equals(nextJobType) && jobId == nextBuildJobId) {
                 // GET JOB DETAIL FROM DATABASE
                 CustomJob testJobDetail = procGetJobDetail(nextJobId);
+                testJobDetail.setBuilderType(customJob.getBuilderType());
                 testJobDetail.setRepositoryType(customJob.getRepositoryType());
                 testJobDetail.setRepositoryUrl(customJob.getRepositoryUrl());
                 testJobDetail.setRepositoryId(customJob.getRepositoryId());
