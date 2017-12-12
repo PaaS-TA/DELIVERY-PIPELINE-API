@@ -23,8 +23,6 @@ ext {
     commonsCodecVersion = '1.10'
 }
 
-
-
 war {
     baseName = 'delivery-pipeline-api'
 }
