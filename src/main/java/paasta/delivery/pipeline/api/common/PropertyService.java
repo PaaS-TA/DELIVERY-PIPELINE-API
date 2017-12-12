@@ -31,6 +31,9 @@ public class PropertyService {
     @Value("${ci.server.ssh.port}")
     private String ciServerSshPort;
 
+    @Value("${ci.server.ssh.identity}")
+    private String ciServerSshIdentity;
+
     // CI SERVER CREDENTIAL INFO
     @Value("${ci.server.credentials.url}")
     private String ciServerCredentialsUrl;
@@ -122,6 +125,16 @@ public class PropertyService {
      */
     public String getCiServerSshPort() {
         return ciServerSshPort;
+    }
+
+
+    /**
+     * Gets ci server ssh identity.
+     *
+     * @return the ci server ssh identity
+     */
+    public String getCiServerSshIdentity() {
+        return ciServerSshIdentity;
     }
 
 

@@ -34,6 +34,7 @@ public class JobBuiltFileService {
     private final String ciServerSshUserName;
     private final String ciServerSshPassword;
     private final String ciServerSshPort;
+    private final String ciServerSshIdentity;
     private final String ciServerWorkspacePath;
 
     private final RestTemplateService restTemplateService;
@@ -51,6 +52,7 @@ public class JobBuiltFileService {
         ciServerSshUserName = propertyService.getCiServerSshUserName();
         ciServerSshPassword = propertyService.getCiServerSshPassword();
         ciServerSshPort = propertyService.getCiServerSshPort();
+        ciServerSshIdentity = propertyService.getCiServerSshIdentity();
         ciServerWorkspacePath = propertyService.getCiServerWorkspacePath();
     }
 
@@ -176,6 +178,10 @@ public class JobBuiltFileService {
         Session session = null;
 
         try {
+            if (null != ciServerSshIdentity && !"null".equals(ciServerSshIdentity)) {
+                jsch.addIdentity(ciServerSshIdentity);
+            }
+
             session = jsch.getSession(ciServerSshUserName, host, port);
             session.setPassword(ciServerSshPassword);
 
@@ -237,26 +243,27 @@ public class JobBuiltFileService {
             out.flush();
 
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            int foo;
+            int bufferSize;
             while (true) {
                 if (buf.length < fileSize) {
-                    foo = buf.length;
+                    bufferSize = buf.length;
                 } else {
-                    foo = (int) fileSize;
+                    bufferSize = (int) fileSize;
                 }
 
-                foo = in.read(buf, 0, foo);
-                if (foo < 0) {
+                bufferSize = in.read(buf, 0, bufferSize);
+                if (bufferSize < 0) {
                     // ERROR
                     break;
                 }
-                bos.write(buf, 0, foo);
+                bos.write(buf, 0, bufferSize);
 
-                fileSize -= foo;
+                fileSize -= bufferSize;
                 if (fileSize == 0L) {
                     break;
                 }
             }
+
             resBytes = bos.toByteArray();
             bos.close();
 
@@ -301,5 +308,4 @@ public class JobBuiltFileService {
             }
         }
     }
-
 }

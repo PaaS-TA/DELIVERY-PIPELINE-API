@@ -47,6 +47,7 @@ ci:
       username: CI-SERVER-SSH-USER-NAME
       password: CI-SERVER-SSH-PASSWORD
       port: CI-SERVER-SSH-PORT
+      identity: CI-SERVER-SSH-IDENTITY
     credentials:
       scope: "GLOBAL"
       url: "/credentials/store/system/domain/_"
@@ -94,6 +95,7 @@ ci:
       username: CI-SERVER-SSH-USER-NAME
       password: CI-SERVER-SSH-PASSWORD
       port: CI-SERVER-SSH-PORT
+      identity: CI-SERVER-SSH-IDENTITY
     credentials:
       scope: "GLOBAL"
       url: "/credentials/store/system/domain/_"
