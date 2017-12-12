@@ -112,6 +112,23 @@ public class JobTemplateServiceTest {
 
 
     /**
+     * Gets build template valid param java github return string.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void getBuildTemplate_ValidParamJava_GITHUB_ReturnString() throws Exception {
+        gTestJobModel.setBuilderType(String.valueOf(JobConfig.BuilderType.GRADLE));
+        gTestJobModel.setRepositoryType(String.valueOf(JobConfig.RepositoryType.GIT_HUB));
+
+        // TEST
+        String resultString = jobTemplateService.getBuildJobTemplate(gTestJobModel);
+
+        assertThat(resultString).isNotNull();
+    }
+
+
+    /**
      * Gets build template valid param java maven scm svn return string.
      *
      * @throws Exception the exception

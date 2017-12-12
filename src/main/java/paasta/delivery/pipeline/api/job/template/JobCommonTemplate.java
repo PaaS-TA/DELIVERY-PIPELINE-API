@@ -69,7 +69,8 @@ class JobCommonTemplate {
         }
 
         // CHECK REPOSITORY TYPE
-        if (String.valueOf(JobConfig.RepositoryType.SCM_GIT).equals(customJob.getRepositoryType())) {
+        if (String.valueOf(JobConfig.RepositoryType.SCM_GIT).equals(customJob.getRepositoryType())
+                || String.valueOf(JobConfig.RepositoryType.GIT_HUB).equals(customJob.getRepositoryType())) {
             loadedJobTemplate = loadedJobTemplate.replace("@REPOSITORY_BRANCH", customJob.getRepositoryBranch());
         }
 
