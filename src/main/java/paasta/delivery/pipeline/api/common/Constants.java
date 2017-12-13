@@ -22,6 +22,9 @@ public class Constants {
     public static final String USE_YN_Y = "Y";
     public static final String USE_YN_N = "N";
 
+    public static final String CI_SERVER_ADMIN_USER_NAME = "admin";
+    public static final String CI_SERVER_ADMIN_SECRET = "!paas_ta202";
+
     /**
      * Instantiates a new Constants.
      */
