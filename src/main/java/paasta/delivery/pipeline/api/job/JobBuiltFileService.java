@@ -178,7 +178,7 @@ public class JobBuiltFileService {
         Session session = null;
 
         try {
-            if (null != ciServerSshIdentity && !"null".equals(ciServerSshIdentity)) {
+            if (!(null == ciServerSshIdentity || "".equals(ciServerSshIdentity) || "null".equals(ciServerSshIdentity))) {
                 jsch.addIdentity(ciServerSshIdentity);
             }
 
