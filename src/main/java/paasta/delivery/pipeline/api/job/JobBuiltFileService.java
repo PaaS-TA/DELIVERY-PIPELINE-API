@@ -1,6 +1,16 @@
 package paasta.delivery.pipeline.api.job;
 
 import com.jcraft.jsch.*;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
@@ -10,10 +20,11 @@ import org.springframework.web.client.HttpServerErrorException;
 import paasta.delivery.pipeline.api.common.*;
 import paasta.delivery.pipeline.api.job.config.JobConfig;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.net.URI;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * paastaDeliveryPipelineApi
@@ -38,6 +49,8 @@ public class JobBuiltFileService {
     private final String ciServerWorkspacePath;
 
     private final RestTemplateService restTemplateService;
+    private final String ciServerAdminUserName;
+    private final String ciServerAdminPassword;
 
 
     /**
@@ -54,6 +67,9 @@ public class JobBuiltFileService {
         ciServerSshPort = propertyService.getCiServerSshPort();
         ciServerSshIdentity = propertyService.getCiServerSshIdentity();
         ciServerWorkspacePath = propertyService.getCiServerWorkspacePath();
+        ciServerAdminUserName = propertyService.getCiServerAdminUserName();
+        ciServerAdminPassword = propertyService.getCiServerAdminPassword();
+
     }
 
     /**
@@ -79,8 +95,7 @@ public class JobBuiltFileService {
             do {
                 c = in.read();
                 sb.append((char) c);
-            }
-            while (c != '\n');
+            } while (c != '\n');
         }
 
         return b;
@@ -130,41 +145,60 @@ public class JobBuiltFileService {
     }
 
 
-    private ByteArrayResource procGetBuiltFileByteArrayResourceForJava(CustomJob customJob) throws JSchException, IOException {
+    private ByteArrayResource procGetBuiltFileByteArrayResourceForJava(CustomJob customJob) throws IOException {
         // GET SERVICE INSTANCES DETAIL FROM DATABASE
         String ciServerUrl = restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + customJob.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class).getCiServerUrl();
 
-        // CREATE JSch SESSION
-        Session session = procCreateJSchSession(ciServerUrl);
-
-        if (session == null) {
-            throw new IOException("JSch SESSION ERROR");
-        }
+        // CREATE JSch SESSION  BOSH_1.0 SCP로 파일 다운로드 기능으로 개발된 코드 BOSH_2.0에서는 사용불가
+//        Session session = procCreateJSchSession(ciServerUrl);
+//
+//        if (session == null) {
+//            throw new IOException("JSch SESSION ERROR");
+//        }
+//
+//        String builderType = customJob.getBuilderType();
+//        String requestFile = ciServerWorkspacePath + customJob.getJobGuid();
+//
+//        if (String.valueOf(JobConfig.BuilderType.GRADLE).equals(builderType)) {
+//            requestFile += "/build/libs/*.war";
+//        }
+//
+//        if (String.valueOf(JobConfig.BuilderType.MAVEN).equals(builderType)) {
+//            requestFile += "/target/*.war";
+//        }
+//
+//        String command = "scp -f " + requestFile;
+//        Channel channel = session.openChannel("exec");
+//        ((ChannelExec) channel).setCommand(command);
+//
+//        OutputStream out = channel.getOutputStream();
+//        InputStream in = channel.getInputStream();
+//
+//        channel.connect();
+//        ByteArrayResource byteArrayResource = procGetByteArrayResource(in, out);
+//        session.disconnect();
 
         String builderType = customJob.getBuilderType();
-        String requestFile = ciServerWorkspacePath + customJob.getJobGuid();
+        String requestFile = ciServerUrl + "/job/" + customJob.getJobGuid();
 
         if (String.valueOf(JobConfig.BuilderType.GRADLE).equals(builderType)) {
-            requestFile += "/build/libs/*.war";
+            requestFile += "/ws/build/libs/";
         }
 
         if (String.valueOf(JobConfig.BuilderType.MAVEN).equals(builderType)) {
-            requestFile += "/target/*.war";
+            requestFile += "/ws/target/";
         }
 
-        String command = "scp -f " + requestFile;
-        Channel channel = session.openChannel("exec");
-        ((ChannelExec) channel).setCommand(command);
 
-        OutputStream out = channel.getOutputStream();
-        InputStream in = channel.getInputStream();
+        Map<String, String> fileInfo = getFileUrl(requestFile);
+        if (fileInfo.get("URL") != null && fileInfo.get("FILE_NAME") != null) {
+            ByteArrayResource byteArrayResource = procGetByteArrayResource(fileInfo.get("FILE_NAME"), fileInfo.get("URL"));
+            return byteArrayResource;
+        } else {
+            return null;
+        }
 
-        channel.connect();
 
-        ByteArrayResource byteArrayResource = procGetByteArrayResource(in, out);
-        session.disconnect();
-
-        return byteArrayResource;
     }
 
 
@@ -198,87 +232,122 @@ public class JobBuiltFileService {
         return session;
     }
 
+//  BOSH_1.0 SCP로 파일 다운로드 기능으로 개발된 코드 BOSH_2.0에서는 사용불가
+//    private ByteArrayResource procGetByteArrayResource(InputStream in, OutputStream out) throws IOException {
+//        byte[] buf = new byte[1024];
+//
+//        buf[0] = 0;
+//        out.write(buf, 0, 1);
+//        out.flush();
+//
+//        String fileName = "";
+//        long fileSize = 0L;
+//        byte[] resBytes = null;
+//
+//        while (true) {
+//            int c = procCheckAck(in);
+//            if (c != 'C') {
+//                break;
+//            }
+//
+//            in.read(buf, 0, 5);
+//            while (true) {
+//                if (in.read(buf, 0, 1) < 0) {
+//                    // error
+//                    break;
+//                }
+//
+//                if (buf[0] == ' ') {
+//                    break;
+//                }
+//
+//                fileSize = fileSize * 10L + (long) (buf[0] - '0');
+//            }
+//
+//            for (int i = 0; ; i++) {
+//                in.read(buf, i, 1);
+//                if (buf[i] == (byte) 0x0a) {
+//                    fileName = new String(buf, 0, i);
+//                    break;
+//                }
+//            }
+//
+//            buf[0] = 0;
+//            out.write(buf, 0, 1);
+//            out.flush();
+//
+//            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//            int bufferSize;
+//            while (true) {
+//                if (buf.length < fileSize) {
+//                    bufferSize = buf.length;
+//                } else {
+//                    bufferSize = (int) fileSize;
+//                }
+//
+//                bufferSize = in.read(buf, 0, bufferSize);
+//                if (bufferSize < 0) {
+//                    // ERROR
+//                    break;
+//                }
+//                bos.write(buf, 0, bufferSize);
+//
+//                fileSize -= bufferSize;
+//                if (fileSize == 0L) {
+//                    break;
+//                }
+//            }
+//
+//            resBytes = bos.toByteArray();
+//            bos.close();
+//
+//            buf[0] = 0;
+//            out.write(buf, 0, 1);
+//            out.flush();
+//        }
+//
+//        String finalFileName = fileName;
+//        return new ByteArrayResource(resBytes != null ? resBytes : new byte[0]) {
+//            @Override
+//            public String getFilename() {
+//                return finalFileName;
+//            }
+//        };
+//    }
 
-    private ByteArrayResource procGetByteArrayResource(InputStream in, OutputStream out) throws IOException {
-        byte[] buf = new byte[1024];
 
-        buf[0] = 0;
-        out.write(buf, 0, 1);
-        out.flush();
+    private ByteArrayResource procGetByteArrayResource(String fileName, String url) throws IOException {
+        try {
 
-        String fileName = "";
-        long fileSize = 0L;
-        byte[] resBytes = null;
+            HttpEntity entity = getEntity(url);
+            if (entity != null) {
+                byte[] resBytes = null;
+                BufferedInputStream bis = new BufferedInputStream(entity.getContent());
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-        while (true) {
-            int c = procCheckAck(in);
-            if (c != 'C') {
-                break;
+                int bufferSize;
+                while ((bufferSize = bis.read()) != -1) {
+                    bos.write(bufferSize);
+                }
+
+                resBytes = bos.toByteArray();
+                bis.close();
+                bis.close();
+
+                String finalFileName = fileName;
+                return new ByteArrayResource(resBytes != null ? resBytes : new byte[0]) {
+                    @Override
+                    public String getFilename() {
+                        return finalFileName;
+                    }
+                };
+
             }
-
-            in.read(buf, 0, 5);
-            while (true) {
-                if (in.read(buf, 0, 1) < 0) {
-                    // error
-                    break;
-                }
-
-                if (buf[0] == ' ') {
-                    break;
-                }
-
-                fileSize = fileSize * 10L + (long) (buf[0] - '0');
-            }
-
-            for (int i = 0; ; i++) {
-                in.read(buf, i, 1);
-                if (buf[i] == (byte) 0x0a) {
-                    fileName = new String(buf, 0, i);
-                    break;
-                }
-            }
-
-            buf[0] = 0;
-            out.write(buf, 0, 1);
-            out.flush();
-
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            int bufferSize;
-            while (true) {
-                if (buf.length < fileSize) {
-                    bufferSize = buf.length;
-                } else {
-                    bufferSize = (int) fileSize;
-                }
-
-                bufferSize = in.read(buf, 0, bufferSize);
-                if (bufferSize < 0) {
-                    // ERROR
-                    break;
-                }
-                bos.write(buf, 0, bufferSize);
-
-                fileSize -= bufferSize;
-                if (fileSize == 0L) {
-                    break;
-                }
-            }
-
-            resBytes = bos.toByteArray();
-            bos.close();
-
-            buf[0] = 0;
-            out.write(buf, 0, 1);
-            out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return null;
 
-        String finalFileName = fileName;
-        return new ByteArrayResource(resBytes != null ? resBytes : new byte[0]) {
-            @Override
-            public String getFilename() {
-                return finalFileName;
-            }
-        };
     }
 
 
@@ -308,4 +377,49 @@ public class JobBuiltFileService {
             }
         }
     }
+
+
+    public Map getFileUrl(String url) {
+        Map fileInfo = new HashMap();
+        try {
+            HttpEntity entity = getEntity(url);
+            if (entity != null) {
+                Document doc = Jsoup.parseBodyFragment(EntityUtils.toString(entity));
+                Elements alinks = doc.select("a");
+                for (String aText : alinks.eachText()) {
+                    try {
+                        String[] fileNames = aText.split("\\.");
+                        if (fileNames[fileNames.length - 1].toUpperCase().equals("JAR") || fileNames[fileNames.length - 1].toUpperCase().equals("WAR")) {
+                            if (fileNames.length <= 2) {
+                                fileInfo.put("URL", url + aText);
+                                fileInfo.put("FILE_NAME", aText);
+                            }
+                        }
+                    } catch (Exception e) {
+                        continue;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return fileInfo;
+    }
+
+
+    public HttpEntity getEntity(String url) throws Exception {
+        URI uri = URI.create(url);
+        HttpClient client = HttpClientBuilder.create().build();
+        HttpGet httpGet = new HttpGet(uri);
+        httpGet.setHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString((ciServerAdminUserName + ":" + ciServerAdminPassword).getBytes("UTF-8")));
+        HttpResponse response = client.execute(httpGet);
+        int statusCode = response.getStatusLine().getStatusCode();
+        if (statusCode == 200) {
+            HttpEntity entity = response.getEntity();
+            return entity;
+        }
+        ((CloseableHttpClient) client).close();
+        return null;
+    }
+
 }

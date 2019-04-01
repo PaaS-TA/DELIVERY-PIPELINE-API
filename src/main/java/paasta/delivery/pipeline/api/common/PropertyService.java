@@ -83,7 +83,7 @@ public class PropertyService {
      *
      * @return the ci server admin user name
      */
-    String getCiServerAdminUserName() {
+    public String getCiServerAdminUserName() {
         return Constants.CI_SERVER_ADMIN_USER_NAME;
     }
 
@@ -93,7 +93,7 @@ public class PropertyService {
      *
      * @return the ci server admin password
      */
-    String getCiServerAdminPassword() {
+    public String getCiServerAdminPassword() {
         return Constants.CI_SERVER_ADMIN_SECRET;
     }
 
@@ -266,5 +266,6 @@ public class PropertyService {
     String getBinaryStorageApiAuthorizationPassword() {
         return binaryStorageApiAuthorizationPassword;
     }
+
 
 }

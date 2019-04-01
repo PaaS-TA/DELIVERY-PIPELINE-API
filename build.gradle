@@ -41,7 +41,8 @@ dependencies {
     compile("commons-io:commons-io:${commonIoVersion}")
     compile("com.jcraft:jsch:${jcraftJschVersion}")
     compile("commons-codec:commons-codec:${commonsCodecVersion}")
-
+    compile("org.apache.httpcomponents:httpclient:4.5")
+    compile("org.jsoup:jsoup:1.11.3")
     testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 }
 
