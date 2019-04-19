@@ -5,6 +5,7 @@
 /out/
 !gradle/wrapper/gradle-wrapper.jar
 src/test/resources/*.yml
+/gradle/
 
 ### STS ###
 .apt_generated
@@ -19,7 +20,7 @@ src/test/resources/*.yml
 *.iws
 *.iml
 *.ipr
-
+*.log
 ### NetBeans ###
 nbproject/private/
 build/
