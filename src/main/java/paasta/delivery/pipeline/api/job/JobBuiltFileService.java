@@ -390,10 +390,8 @@ public class JobBuiltFileService {
                     try {
                         String[] fileNames = aText.split("\\.");
                         if (fileNames[fileNames.length - 1].toUpperCase().equals("JAR") || fileNames[fileNames.length - 1].toUpperCase().equals("WAR")) {
-                            if (fileNames.length <= 2) {
-                                fileInfo.put("URL", url + aText);
-                                fileInfo.put("FILE_NAME", aText);
-                            }
+                            fileInfo.put("URL", url + aText);
+                            fileInfo.put("FILE_NAME", aText);
                         }
                     } catch (Exception e) {
                         continue;

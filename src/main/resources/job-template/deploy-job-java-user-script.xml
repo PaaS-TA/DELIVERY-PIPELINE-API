@@ -74,7 +74,7 @@ if [ $DEPLOY_TYPE = "DEV" ]; then
     wget $BUILD_FILE_PATH -O $BUILD_FILE_NAME -q
 
     echo "## DEV DEPLOY :: CF PUSH"
-    cf push $APP_NAME -b $BUILD_PACK_NAME -p ./$BUILD_FILE_NAME
+    cf push $APP_NAME -f manifest.yml -p ./$BUILD_FILE_NAME
 
     echo "## DEV DEPLOY :: DELETE BUILD FILE"
     rm -rf ./$BUILD_FILE_NAME
@@ -105,7 +105,7 @@ if [ $DEPLOY_TYPE = "GREEN_DEPLOY" ]; then
     wget $BUILD_FILE_PATH -O $BUILD_FILE_NAME -q
 
     echo "## GREEN DEPLOY :: CF PUSH"
-    cf push $GREEN_APP_NAME -b $BUILD_PACK_NAME -p ./$BUILD_FILE_NAME
+    cf push $GREEN_APP_NAME -f manifest.yml -p ./$BUILD_FILE_NAME
 
     echo "## GREEN DEPLOY :: DELETE BUILD FILE"
     rm -rf ./$BUILD_FILE_NAME
