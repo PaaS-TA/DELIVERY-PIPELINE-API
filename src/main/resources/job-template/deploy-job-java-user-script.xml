@@ -78,6 +78,7 @@ if [ $DEPLOY_TYPE = "DEV" ]; then
 
     echo "## DEV DEPLOY :: DELETE BUILD FILE"
     rm -rf ./$BUILD_FILE_NAME
+    rm -rf ./manifest.yml
     echo "#### DEV DEPLOY :: END"
 fi
 
@@ -109,6 +110,7 @@ if [ $DEPLOY_TYPE = "GREEN_DEPLOY" ]; then
 
     echo "## GREEN DEPLOY :: DELETE BUILD FILE"
     rm -rf ./$BUILD_FILE_NAME
+    rm -rf ./manifest.yml
     echo "#### GREEN DEPLOY :: END"
 fi
 
