@@ -10,9 +10,9 @@ package paasta.delivery.pipeline.api.job.config;
  */
 public class JobConfig {
 
-    private static final String JOB_TRIGGER_PREVIOUS_JOB_SUCCESS_STRING = "이전 작업(Job)을 완료할 때 작업 실행";
-    private static final String JOB_TRIGGER_MODIFIED_PUSH_STRING = "변경사항을 푸시할 때마다 작업 실행";
-    private static final String JOB_TRIGGER_MANUAL_TRIGGER_STRING = "이 작업(Job)을 수동으로 실행할 때만 작업 실행";
+    private static final String JOB_TRIGGER_PREVIOUS_JOB_SUCCESS_STRING = "Running a job when it completes the previous job";
+    private static final String JOB_TRIGGER_MODIFIED_PUSH_STRING = "Run a job every time you push a change";
+    private static final String JOB_TRIGGER_MANUAL_TRIGGER_STRING = "Run job only when running this job manually";
 
 
     /**
@@ -57,15 +57,15 @@ public class JobConfig {
         /**
          * Build job type.
          */
-        BUILD("빌드 (Build)"),
+        BUILD("Build"),
         /**
          * Test job type.
          */
-        TEST("테스트 (Test)"),
+        TEST("Test"),
         /**
          * Deploy job type.
          */
-        DEPLOY("배포 (Deploy)");
+        DEPLOY("Deploy");
 
         private String actualValue;
 
@@ -155,11 +155,11 @@ public class JobConfig {
         /**
          * Dev deploy type.
          */
-        DEV("개발배포"),
+        DEV("Development"),
         /**
          * Prd deploy type.
          */
-        PRD("운영배포");
+        PRD("Production");
 
         private String actualValue;
 
