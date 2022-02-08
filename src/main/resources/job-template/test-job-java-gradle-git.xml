@@ -25,6 +25,7 @@
     <disabled>false</disabled>
     <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
     <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <jdk>@JAVA_NAME</jdk>
     <triggers/>
     <concurrentBuild>false</concurrentBuild>
     <builders>

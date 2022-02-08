@@ -26,7 +26,13 @@ public class JobConfig {
         /**
          * Builder ConfigType.
          */
+        LANGUAGE,
+        LANGUAGE_VERSION,
+        /**
+         * Builder ConfigType.
+         */
         BUILDER,
+        BUILDER_VERSION,
         /**
          * Job config type.
          */
@@ -117,6 +123,52 @@ public class JobConfig {
         }
     }
 
+    /**
+     * The enum Builder LanguageType
+     */
+    public enum LanguageType {
+
+        JAVA("JAVA");
+
+        /* //추후 확장될 빌드 언어
+        RUBY("DOTNET"),
+        DOTNET("DOTNET"),
+        NODEJS("DOTNET"),
+        GO("DOTNET"),
+        PYTHON("DOTNET"),
+        PHP("DOTNET");
+        */
+        private String actualValue;
+
+        LanguageType(String actualValue) {
+            this.actualValue = actualValue;
+        }
+
+        public String getActualValue() {
+            return actualValue;
+        }
+    }
+
+    /**
+     * The enum Builder LanguageType Version
+     */
+    public enum LanguageTypeVersion {
+
+        //jenkins Global Tool Configuration - JDK
+        JAVA_8("java-1.8.152"),
+        JAVA_11("jdk-11"),
+        JAVA_17("jdk-17");
+
+        private String actualValue;
+
+        LanguageTypeVersion(String actualValue) {
+            this.actualValue = actualValue;
+        }
+
+        public String getActualValue() {
+            return actualValue;
+        }
+    }
 
     /**
      * The enum Builder ConfigType.
@@ -146,6 +198,35 @@ public class JobConfig {
             return actualValue;
         }
     }
+
+    /**
+     * The enum Builder ConfigType Version
+     */
+    public enum BuilderTypeVersion {
+
+        //jenkins Global Tool Configuration - Gradle & Maven
+        GRADLE_2("gradle-2.14.1"),
+        GRADLE_3("gradle-3.5.0"),
+        GRADLE_4("gradle-4.10.3"),
+        GRADLE_5("gradle-5.6.4"),
+        GRADLE_6("gradle-6.7.1"),
+        GRADLE_7("gradle-7.3.3"),
+
+        MAVEN_3_5("maven-3.5.0"),
+        MAVEN_3_6("maven-3.6.3"),
+        MAVEN_3_8("maven-3.8.4");
+
+        private String actualValue;
+
+        BuilderTypeVersion(String actualValue) {
+            this.actualValue = actualValue;
+        }
+
+        public String getActualValue() {
+            return actualValue;
+        }
+    }
+
 
 
     /**

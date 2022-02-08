@@ -19,7 +19,10 @@ public class CustomJob {
     private String jobGuid;
     private int groupOrder;
     private int jobOrder;
+    private String languageType;
+    private String languageTypeVersion;
     private String builderType;
+    private String builderTypeVersion;
     private long buildJobId;
     private String jobTrigger;
     private String postActionYn;
@@ -144,6 +147,18 @@ public class CustomJob {
     public void setJobOrder(int jobOrder) {
         this.jobOrder = jobOrder;
     }
+
+    public String getLanguageType() { return languageType; }
+
+    public void setLanguageType(String languageType) { this.languageType = languageType; }
+
+    public String getLanguageTypeVersion() { return languageTypeVersion; }
+
+    public void setLanguageTypeVersion(String languageTypeVersion) { this.languageTypeVersion = languageTypeVersion; }
+
+    public String getBuilderTypeVersion() { return builderTypeVersion; }
+
+    public void setBuilderTypeVersion(String builderTypeVersion) { this.builderTypeVersion = builderTypeVersion; }
 
     public String getBuilderType() {
         return builderType;

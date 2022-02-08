@@ -57,6 +57,8 @@ class JobCommonTemplate {
             classLoader = getClass().getClassLoader();
             templateFile = new File(classLoader.getResource(templateFilePath).getFile());
             loadedJobTemplate = FileUtils.readFileToString(templateFile, "UTF-8");
+
+            loadedJobTemplate = loadedJobTemplate.replace("@GRADLE_NAME", customJob.getBuilderTypeVersion());
         }
 
         // CHECK BUILDER TYPE :: MAVEN
@@ -66,16 +68,23 @@ class JobCommonTemplate {
             classLoader = getClass().getClassLoader();
             templateFile = new File(classLoader.getResource(templateFilePath).getFile());
             loadedJobTemplate = FileUtils.readFileToString(templateFile, "UTF-8");
+
+            loadedJobTemplate = loadedJobTemplate.replace("@MAVEN_NAME", customJob.getBuilderTypeVersion());
         }
 
         // CHECK REPOSITORY TYPE
         if (String.valueOf(JobConfig.RepositoryType.SCM_GIT).equals(customJob.getRepositoryType())
                 || String.valueOf(JobConfig.RepositoryType.GIT_HUB).equals(customJob.getRepositoryType())) {
-            loadedJobTemplate = loadedJobTemplate.replace("@REPOSITORY_BRANCH", customJob.getRepositoryBranch());
+            if(customJob.getRepositoryBranch().startsWith("refs/tags/")){   //태그
+                loadedJobTemplate = loadedJobTemplate.replace("*/@REPOSITORY_BRANCH", customJob.getRepositoryBranch());
+            }else{
+                loadedJobTemplate = loadedJobTemplate.replace("@REPOSITORY_BRANCH", customJob.getRepositoryBranch());
+            }
         }
 
         loadedJobTemplate = loadedJobTemplate.replace("@REPOSITORY_URL", customJob.getRepositoryUrl());
         loadedJobTemplate = loadedJobTemplate.replace("@REPOSITORY_ACCOUNT_ID", customJob.getRepositoryAccountId());
+        loadedJobTemplate = loadedJobTemplate.replace("@JAVA_NAME", customJob.getLanguageTypeVersion());
 
         return loadedJobTemplate;
     }

@@ -9,6 +9,7 @@ import paasta.delivery.pipeline.api.job.CustomJob;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,6 +29,7 @@ public class RepositoryService {
     private static final String SEARCH_SCM_SVN_STRING = "/svn/";
     private static final String SEARCH_GIT_HUB_STRING = "https://github.com";
     private static final String SEARCH_BRANCHES_STRING = "/branches";
+    private static final String SEARCH_TAGS_STRING = "/tags";
     private static final String SEARCH_COMMIT_REVISION_STRING = "/changesets?limit=1&branch=";
 
     private final RestTemplateService restTemplateService;
@@ -98,10 +100,25 @@ public class RepositoryService {
     private String procGetGitHubRepositoryCommitRevision(CustomJob customJob, String reqRepositoryCommitRevisionUrl) {
         String resultString;
 
-        // CUSTOM REST SEND :: GET BRANCH LIST
-        LinkedHashMap tempMap = restTemplateService.customSend(reqRepositoryCommitRevisionUrl + "/" + customJob.getRepositoryBranch(), HttpMethod.GET, null, LinkedHashMap.class, customJob);
-        Map tempSubMap = (Map) tempMap.get("commit");
-        resultString = tempSubMap.get("sha").toString();
+        if(customJob.getRepositoryBranch().startsWith("refs/tags/")){
+            // CUSTOM REST SEND :: GET TAG CommitRevision
+            List tempList = restTemplateService.customSend(reqRepositoryCommitRevisionUrl.replace(SEARCH_BRANCHES_STRING,SEARCH_TAGS_STRING) , HttpMethod.GET, null, List.class, customJob);
+            String tempString = "";
+            for (Object aRepositoryList : tempList) {
+                Map tempMap = (Map) aRepositoryList;
+                if(tempMap.get("name").toString().equals(customJob.getRepositoryBranch().replace("refs/tags/",""))){
+                    Map tempSubMap = (Map) tempMap.get("commit");
+                    tempString = tempSubMap.get("sha").toString();
+                }
+            }
+            resultString = tempString;
+
+        }else{
+            // CUSTOM REST SEND :: GET BRANCH CommitRevision
+            LinkedHashMap tempMap = restTemplateService.customSend(reqRepositoryCommitRevisionUrl + "/" + customJob.getRepositoryBranch(), HttpMethod.GET, null, LinkedHashMap.class, customJob);
+            Map tempSubMap = (Map) tempMap.get("commit");
+            resultString = tempSubMap.get("sha").toString();
+        }
 
         return resultString;
     }
@@ -147,10 +164,26 @@ public class RepositoryService {
         String resultString;
         String repositoryBranch = customJob.getRepositoryBranch();
 
-        // CUSTOM REST SEND :: GET REPOSITORY COMMIT REVISION
-        LinkedHashMap tempResultMap = restTemplateService.customSend(reqRepositoryCommitRevisionUrl + repositoryBranch, HttpMethod.GET, null, LinkedHashMap.class, customJob);
-        ArrayList<LinkedHashMap> tempList = (ArrayList<LinkedHashMap>) tempResultMap.get("changesets");
-        resultString = (String) tempList.get(0).get("id");
+        if(customJob.getRepositoryBranch().startsWith("refs/tags/")){
+            // CUSTOM REST SEND :: GET REPOSITORY TAG COMMIT REVISION
+            LinkedHashMap tempResultMap = restTemplateService.customSend(reqRepositoryCommitRevisionUrl.replace(SEARCH_COMMIT_REVISION_STRING,SEARCH_TAGS_STRING) , HttpMethod.GET, null, LinkedHashMap.class, customJob);
+            ArrayList<LinkedHashMap> tempList = (ArrayList<LinkedHashMap>) tempResultMap.get("tag");
+            String tempString = "";
+            System.out.println("tempList.size="+tempList.size());
+            for (Object aRepositoryList : tempList) {
+                Map tempMap = (Map) aRepositoryList;
+                if(tempMap.get("name").toString().equals(customJob.getRepositoryBranch().replace("refs/tags/",""))){
+                    tempString = tempMap.get("revision").toString();
+                }
+            }
+
+            resultString = tempString;
+        }else{
+            // CUSTOM REST SEND :: GET REPOSITORY BRANCH COMMIT REVISION
+            LinkedHashMap tempResultMap = restTemplateService.customSend(reqRepositoryCommitRevisionUrl + repositoryBranch, HttpMethod.GET, null, LinkedHashMap.class, customJob);
+            ArrayList<LinkedHashMap> tempList = (ArrayList<LinkedHashMap>) tempResultMap.get("changesets");
+            resultString = (String) tempList.get(0).get("id");
+        }
 
         return resultString;
     }

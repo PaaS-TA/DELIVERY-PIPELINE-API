@@ -27,12 +27,13 @@
     <disabled>false</disabled>
     <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
     <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <jdk>@JAVA_NAME</jdk>
     <triggers/>
     <concurrentBuild>false</concurrentBuild>
     <builders>
         <hudson.tasks.Maven>
             <targets>clean test org.jacoco:jacoco-maven-plugin:prepare-agent install</targets>
-            <mavenName>maven-3.5</mavenName>
+            <mavenName>@MAVEN_NAME</mavenName>
             <usePrivateRepository>false</usePrivateRepository>
             <settings class="jenkins.mvn.DefaultSettingsProvider"/>
             <globalSettings class="jenkins.mvn.DefaultGlobalSettingsProvider"/>

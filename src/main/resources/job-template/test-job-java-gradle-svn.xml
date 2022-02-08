@@ -27,15 +27,16 @@
     <disabled>false</disabled>
     <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
     <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <jdk>@JAVA_NAME</jdk>
     <triggers/>
     <concurrentBuild>false</concurrentBuild>
     <builders>
-        <hudson.plugins.gradle.Gradle plugin="gradle@1.28">
+        <hudson.plugins.gradle.Gradle plugin="@GRADLE_PLUGIN_VERSION">
             <switches></switches>
             <tasks>test</tasks>
             <rootBuildScriptDir></rootBuildScriptDir>
             <buildFile></buildFile>
-            <gradleName>gradle-3.5.1</gradleName>
+            <gradleName>@GRADLE_NAME</gradleName>
             <useWrapper>false</useWrapper>
             <makeExecutable>false</makeExecutable>
             <useWorkspaceAsHome>false</useWorkspaceAsHome>

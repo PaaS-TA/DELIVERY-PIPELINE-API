@@ -36,12 +36,25 @@ public class JobConfigService {
             resultList = procConfigTypeList(JobConfig.JobType.values());
         }
 
+        // LANGUAGE TYPE
+        if (String.valueOf(JobConfig.ConfigType.LANGUAGE).equals(configType)) {
+            resultList = procConfigTypeList(JobConfig.LanguageType.values());
+        }
+
+        //LANGUAGE TYPE VERSION
+        if (String.valueOf(JobConfig.ConfigType.LANGUAGE_VERSION).equals(configType)) {
+            resultList = procConfigTypeList(JobConfig.LanguageTypeVersion.values());
+        }
 
         // BUILDER TYPE
         if (String.valueOf(JobConfig.ConfigType.BUILDER).equals(configType)) {
             resultList = procConfigTypeList(JobConfig.BuilderType.values());
         }
 
+        //BUILDER TYPE VERSION
+        if (String.valueOf(JobConfig.ConfigType.BUILDER_VERSION).equals(configType)) {
+            resultList = procConfigTypeList(JobConfig.BuilderTypeVersion.values());
+        }
 
         // REPOSITORY TYPE
         if (String.valueOf(JobConfig.ConfigType.REPOSITORY).equals(configType)) {
