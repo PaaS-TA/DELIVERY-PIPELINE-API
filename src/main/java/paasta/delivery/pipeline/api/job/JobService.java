@@ -429,12 +429,21 @@ public class JobService {
                 testJobDetail.setRepositoryAccountId(customJob.getRepositoryAccountId());
                 testJobDetail.setRepositoryBranch(customJob.getRepositoryBranch());
                 testJobDetail.setRepositoryCommitRevision(customJob.getRepositoryCommitRevision());
+                testJobDetail.setLanguageType(customJob.getLanguageType());
+                testJobDetail.setLanguageTypeVersion(customJob.getLanguageTypeVersion());
+                testJobDetail.setBuilderTypeVersion(customJob.getBuilderTypeVersion());
 
                 // SET REPOSITORY ACCOUNT PASSWORD BY AES256
                 testJobDetail.setRepositoryAccountPassword(commonService.setPasswordByAES256(Constants.AES256Type.ENCODE, customJob.getRepositoryAccountPassword()));
 
                 // UPDATE TEST JOB TO DATABASE
                 resultModel = procUpdateJobToDb(testJobDetail);
+
+                // UPDATE TEST JOB TO CI SERVER
+                commonService.procGetCiServer(customJob.getCiServerUrl()).updateJob(testJobDetail.getJobGuid(), jobTemplateService.getTestJobTemplate(testJobDetail), true);
+
+                // UPDATE INSPECTION PROJECT TO INSPECTION API
+                inspectionProjectService.updateProject(testJobDetail);
             }
         }
 
@@ -463,6 +472,9 @@ public class JobService {
         customJob.setRepositoryAccountPassword(repositoryAccountPassword);
         customJob.setRepositoryBranch(buildJobDetail.getRepositoryBranch());
         customJob.setRepositoryCommitRevision(buildJobDetail.getRepositoryCommitRevision());
+        customJob.setLanguageType(buildJobDetail.getLanguageType());
+        customJob.setLanguageTypeVersion(buildJobDetail.getLanguageTypeVersion());
+        customJob.setBuilderTypeVersion(buildJobDetail.getBuilderTypeVersion());
 
         // CREATE INSPECTION PROJECT TO INSPECTION API
         InspectionProject resultInspectionProject = inspectionProjectService.createProject(customJob);
@@ -532,6 +544,9 @@ public class JobService {
         customJob.setRepositoryAccountPassword(repositoryAccountPassword);
         customJob.setRepositoryBranch(buildJobDetail.getRepositoryBranch());
         customJob.setRepositoryCommitRevision(buildJobDetail.getRepositoryCommitRevision());
+        customJob.setLanguageType(buildJobDetail.getLanguageType());
+        customJob.setLanguageTypeVersion(buildJobDetail.getLanguageTypeVersion());
+        customJob.setBuilderTypeVersion(buildJobDetail.getBuilderTypeVersion());
         customJob.setInspectionProjectId(jobDetail.getInspectionProjectId());
         customJob.setInspectionProjectName(jobDetail.getInspectionProjectName());
         customJob.setInspectionProjectKey(jobDetail.getInspectionProjectKey());

@@ -42,6 +42,8 @@ public class JobTemplateServiceTest {
     private static final String CF_PASSWORD = "test-cf-password";
     private static final String CF_API_URL = "test-cf-api-url";
     private static final String MANIFEST_SCRIPT = "test-manifest-script\\n";
+    private static final String LANGUAGE_TYPE_VERSION = "test-languageTypeVersion";
+    private static final String BUILDER_TYPE_VERSION = "test-builderTypeVersion";
 
     private static CustomJob gTestJobModel = null;
     private static CfInfo gTestCfInfoModel = null;
@@ -72,6 +74,8 @@ public class JobTemplateServiceTest {
         gTestJobModel.setInspectionProjectKey(INSPECTION_PROJECT_KEY);
         gTestJobModel.setManifestUseYn(Constants.USE_YN_N);
         gTestJobModel.setCfInfoId(1L);
+        gTestJobModel.setLanguageTypeVersion(LANGUAGE_TYPE_VERSION);
+        gTestJobModel.setBuilderTypeVersion(BUILDER_TYPE_VERSION);
 
         gTestCfInfoModel.setCfId(CF_ID);
         gTestCfInfoModel.setCfPassword(CF_PASSWORD);
