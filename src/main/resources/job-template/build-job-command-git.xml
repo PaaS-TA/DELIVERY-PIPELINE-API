@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <description></description>
+    <keepDependencies>false</keepDependencies>
+    <scm class="hudson.plugins.git.GitSCM" plugin="@SCM_GIT_PLUGIN_VERSION">
+        <configVersion>2</configVersion>
+        <userRemoteConfigs>
+            <hudson.plugins.git.UserRemoteConfig>
+                <url>@REPOSITORY_URL</url>
+                <credentialsId>@REPOSITORY_ACCOUNT_ID</credentialsId>
+            </hudson.plugins.git.UserRemoteConfig>
+        </userRemoteConfigs>
+        <branches>
+            <hudson.plugins.git.BranchSpec>
+                <name>*/@REPOSITORY_BRANCH</name>
+            </hudson.plugins.git.BranchSpec>
+        </branches>
+        <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+        <submoduleCfg class="list"/>
+        <extensions/>
+    </scm>
+    <canRoam>true</canRoam>
+    <disabled>false</disabled>
+    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <triggers/>
+    <concurrentBuild>false</concurrentBuild>
+    <builders>
+        <hudson.tasks.Shell>
+            <command>
+                @COMMAND_TEXT
+            </command>
+        </hudson.tasks.Shell>
+        <hudson.tasks.Shell>
+            <command>
+                cd /var/tmp
+                tar -zcvf $JOB_NAME.tar.gz -C $WORKSPACE --exclude build --exclude .git --exclude .svn .
+
+                mkdir -p $WORKSPACE/build/libs
+
+                rm -rf $WORKSPACE/build/libs/*
+                mv /var/tmp/$JOB_NAME.tar.gz $WORKSPACE/build/libs/
+            </command>
+        </hudson.tasks.Shell>
+    </builders>
+    <publishers/>
+    <buildWrappers/>
+</project>

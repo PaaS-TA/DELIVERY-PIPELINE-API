@@ -124,7 +124,12 @@ public class JobBuiltFileService {
         // GET JOB DETAIL FROM DATABASE
         CustomJob tempResultModel = restTemplateService.send(Constants.TARGET_COMMON_API, REQ_URL + "/" + customJob.getId(), HttpMethod.GET, null, CustomJob.class);
         customJob.setBuilderType(tempResultModel.getBuilderType());
-        byteArrayResource = procGetBuiltFileByteArrayResourceForJava(customJob);
+
+        if(String.valueOf(JobConfig.LanguageType.JAVA).equals(tempResultModel.getLanguageType())){
+            byteArrayResource = procGetBuiltFileByteArrayResourceForJava(customJob);
+        }else{
+            byteArrayResource = procGetBuiltFileByteArrayResourceForCommand(customJob);
+        }
 
         try {
             // SEND FILE TO BINARY STORAGE API
@@ -199,6 +204,21 @@ public class JobBuiltFileService {
         }
 
 
+    }
+
+    private ByteArrayResource procGetBuiltFileByteArrayResourceForCommand(CustomJob customJob) throws IOException {
+
+        // GET SERVICE INSTANCES DETAIL FROM DATABASE
+        String ciServerUrl = restTemplateService.send(Constants.TARGET_COMMON_API, REQ_SERVICE_INSTANCES_URL + customJob.getServiceInstancesId(), HttpMethod.GET, null, ServiceInstances.class).getCiServerUrl();
+        String requestFile = ciServerUrl + "/job/" + customJob.getJobGuid() + "/ws/build/libs/";
+
+        Map<String, String> fileInfo = getFileUrl(requestFile);
+        if (fileInfo.get("URL") != null && fileInfo.get("FILE_NAME") != null) {
+            ByteArrayResource byteArrayResource = procGetByteArrayResource(fileInfo.get("FILE_NAME"), fileInfo.get("URL"));
+            return byteArrayResource;
+        } else {
+            return null;
+        }
     }
 
 
@@ -389,7 +409,7 @@ public class JobBuiltFileService {
                 for (String aText : alinks.eachText()) {
                     try {
                         String[] fileNames = aText.split("\\.");
-                        if (fileNames[fileNames.length - 1].toUpperCase().equals("JAR") || fileNames[fileNames.length - 1].toUpperCase().equals("WAR")) {
+                        if (fileNames[fileNames.length - 1].toUpperCase().equals("JAR") || fileNames[fileNames.length - 1].toUpperCase().equals("WAR") || fileNames[fileNames.length - 1].toUpperCase().equals("TAR") || fileNames[fileNames.length - 1].toUpperCase().equals("GZ")) {
                             fileInfo.put("URL", url + aText);
                             fileInfo.put("FILE_NAME", aText);
                         }

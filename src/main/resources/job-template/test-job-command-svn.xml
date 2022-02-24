@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <actions/>
+    <description></description>
+    <keepDependencies>false</keepDependencies>
+    <properties/>
+    <scm class="hudson.scm.SubversionSCM" plugin="subversion@2.9">
+        <locations>
+            <hudson.scm.SubversionSCM_-ModuleLocation>
+                <remote>@REPOSITORY_URL</remote>
+                <credentialsId>@REPOSITORY_ACCOUNT_ID</credentialsId>
+                <local>.</local>
+                <depthOption>infinity</depthOption>
+                <ignoreExternalsOption>true</ignoreExternalsOption>
+            </hudson.scm.SubversionSCM_-ModuleLocation>
+        </locations>
+        <excludedRegions></excludedRegions>
+        <includedRegions></includedRegions>
+        <excludedUsers></excludedUsers>
+        <excludedRevprop></excludedRevprop>
+        <excludedCommitMessages></excludedCommitMessages>
+        <workspaceUpdater class="hudson.scm.subversion.CheckoutUpdater"/>
+        <ignoreDirPropChanges>false</ignoreDirPropChanges>
+        <filterChangelog>false</filterChangelog>
+    </scm>
+    <canRoam>true</canRoam>
+    <disabled>false</disabled>
+    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <jdk>@JAVA_NAME</jdk>
+    <triggers/>
+    <concurrentBuild>false</concurrentBuild>
+    <builders>
+        <hudson.tasks.Shell>
+            <command>
+                @COMMAND_TEXT
+            </command>
+        </hudson.tasks.Shell>
+        <hudson.plugins.sonar.SonarRunnerBuilder plugin="sonar@2.6.1">
+            <project></project>
+            <properties>sonar.projectName=@INSPECTION_PROJECT_NAME
+                sonar.projectKey=@INSPECTION_PROJECT_KEY
+                sonar.projectVersion=1.0
+                sonar.sources=.
+                sonar.sourceEncoding=UTF-8
+                sonar.scm.provider=svn
+                sonar.svn.username=@SVN_USER_NAME
+                sonar.svn.password.secured=@SVN_USER_PASSWORD
+                sonar.log.level=TRACE
+            </properties>
+            <javaOpts></javaOpts>
+            <additionalArguments></additionalArguments>
+            <jdk>(Inherit From Job)</jdk>
+            <task></task>
+        </hudson.plugins.sonar.SonarRunnerBuilder>
+    </builders>
+    <publishers>
+        <quality.gates.jenkins.plugin.QGPublisher plugin="quality-gates@2.5">
+            <jobConfigData>
+                <projectKey>@INSPECTION_PROJECT_KEY</projectKey>
+                <sonarInstanceName>sonarqube-5.6.7</sonarInstanceName>
+            </jobConfigData>
+            <buildDecision>
+                <qualityGatesProvider>
+                    <qualityGateResponseParser/>
+                    <sonarHttpRequester/>
+                    <sonarInstanceValidationService/>
+                </qualityGatesProvider>
+            </buildDecision>
+            <jobConfigurationService/>
+            <jobExecutionService/>
+        </quality.gates.jenkins.plugin.QGPublisher>
+    </publishers>
+    <buildWrappers/>
+</project>

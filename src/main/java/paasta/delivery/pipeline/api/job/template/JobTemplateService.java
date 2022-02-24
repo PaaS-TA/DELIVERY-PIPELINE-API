@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import paasta.delivery.pipeline.api.cf.info.CfInfoService;
 import paasta.delivery.pipeline.api.cf.info.CfInfo;
 import paasta.delivery.pipeline.api.job.CustomJob;
+import paasta.delivery.pipeline.api.job.config.JobConfig;
 
 import java.io.IOException;
 
@@ -43,21 +44,14 @@ public class JobTemplateService {
      */
     public String getBuildJobTemplate(CustomJob customJob) throws IOException {
         String loadedBuildTemplate = "";
-//        String builderLanguage = customJob.getBuilderLanguage();
+        String builderLanguage = customJob.getLanguageType();
 
-        // TODO FIX
-//        // CHECK BUILDER LANGUAGE :: JAVA
-//        if (String.valueOf(JobConfig.BuilderLanguage.JAVA).equals(builderLanguage)) {
-//            loadedBuildTemplate = new BuildJobTemplate().getBuildJobTemplateForJava(customJob);
-//        }
-//
-//        // CHECK BUILDER LANGUAGE :: GO
-//        if (String.valueOf(JobConfig.BuilderLanguage.GO).equals(builderLanguage)) {
-//            loadedBuildTemplate = new BuildJobTemplate().getBuildJobTemplateForGo();
-//        }
-
-
-        loadedBuildTemplate = new BuildJobTemplate().getBuildJobTemplateForJava(customJob);
+        // CHECK BUILDER LANGUAGE :: JAVA
+        if (String.valueOf(JobConfig.LanguageType.JAVA).equals(builderLanguage)) {
+            loadedBuildTemplate = new BuildJobTemplate().getBuildJobTemplateForJava(customJob);
+        }else{  // CHECK BUILDER LANGUAGE :: OTHER
+            loadedBuildTemplate = new BuildJobTemplate().getBuildJobTemplateForCommand(customJob);
+        }
 
         return loadedBuildTemplate;
     }
@@ -72,20 +66,14 @@ public class JobTemplateService {
      */
     public String getTestJobTemplate(CustomJob customJob) throws IOException {
         String loadedTestJobTemplate;
+        String builderLanguage = customJob.getLanguageType();
 
-        // TODO FIX
-//        String deployLanguage = customJob.getBuilderLanguage();
-//        // CHECK BUILDER LANGUAGE :: JAVA
-//        if (String.valueOf(JobConfig.BuilderLanguage.JAVA).equals(deployLanguage)) {
-//            loadedDeployTemplate = new DeployJobTemplate(propertyService).getDeployJobTemplateForJava(customJob);
-//        }
-//
-//        // CHECK BUILDER LANGUAGE :: GO
-//        if (String.valueOf(JobConfig.BuilderLanguage.GO).equals(deployLanguage)) {
-//            loadedDeployTemplate = new DeployJobTemplate(propertyService).getDeployJobTemplateForGo();
-//        }
-
-        loadedTestJobTemplate = new TestJobTemplate().getTestJobTemplateForJava(customJob);
+        // CHECK BUILDER LANGUAGE :: JAVA
+        if (String.valueOf(JobConfig.LanguageType.JAVA).equals(builderLanguage)) {
+            loadedTestJobTemplate = new TestJobTemplate().getTestJobTemplateForJava(customJob);
+        }else{  // CHECK BUILDER LANGUAGE :: OTHER
+            loadedTestJobTemplate = new TestJobTemplate().getTestJobTemplateForCommand(customJob);
+        }
 
         return loadedTestJobTemplate;
     }
@@ -100,20 +88,14 @@ public class JobTemplateService {
      */
     public String getDeployJobTemplate(CustomJob customJob) throws IOException {
         String loadedDeployJobTemplate;
+        String builderLanguage = customJob.getLanguageType();
 
-        // TODO FIX
-//        String deployLanguage = customJob.getBuilderLanguage();
-//        // CHECK BUILDER LANGUAGE :: JAVA
-//        if (String.valueOf(JobConfig.BuilderLanguage.JAVA).equals(deployLanguage)) {
-//            loadedDeployTemplate = new DeployJobTemplate(propertyService).getDeployJobTemplateForJava(customJob);
-//        }
-//
-//        // CHECK BUILDER LANGUAGE :: GO
-//        if (String.valueOf(JobConfig.BuilderLanguage.GO).equals(deployLanguage)) {
-//            loadedDeployTemplate = new DeployJobTemplate(propertyService).getDeployJobTemplateForGo();
-//        }
-
-        loadedDeployJobTemplate = new DeployJobTemplate().getDeployJobTemplateForJava(customJob);
+        // CHECK BUILDER LANGUAGE :: JAVA
+        if (String.valueOf(JobConfig.LanguageType.JAVA).equals(builderLanguage)) {
+            loadedDeployJobTemplate = new DeployJobTemplate().getDeployJobTemplateForJava(customJob);
+        }else{  // CHECK BUILDER LANGUAGE :: OTHER
+            loadedDeployJobTemplate = new DeployJobTemplate().getDeployJobTemplateForCommand(customJob);
+        }
 
         return procSetCfAccountInfo(loadedDeployJobTemplate, customJob);
     }
