@@ -25,4 +25,15 @@ class BuildJobTemplate extends JobCommonTemplate {
         return getCommonTemplateForBuildTestJobForJava(customJob);
     }
 
+    /**
+     * Gets build template for java.
+     *
+     * @param customJob the custom job
+     * @return the build template for java
+     * @throws IOException the io exception
+     */
+    String getBuildJobTemplateForCommand(CustomJob customJob) throws IOException {
+        return getCommonTemplateForBuildTestJobForCommand(customJob);
+    }
+
 }

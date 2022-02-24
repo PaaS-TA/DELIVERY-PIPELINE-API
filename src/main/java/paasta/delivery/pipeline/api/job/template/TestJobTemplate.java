@@ -34,4 +34,18 @@ class TestJobTemplate extends JobCommonTemplate {
         return loadedJobTemplate;
     }
 
+    String getTestJobTemplateForCommand(CustomJob customJob) throws IOException {
+        String loadedJobTemplate = getCommonTemplateForBuildTestJobForCommand(customJob);
+
+        // FOR SVN REPOSITORY
+        loadedJobTemplate = loadedJobTemplate.replace("@SVN_USER_NAME", customJob.getRepositoryAccountId());
+        loadedJobTemplate = loadedJobTemplate.replace("@SVN_USER_PASSWORD", customJob.getRepositoryAccountPassword());
+
+        loadedJobTemplate = loadedJobTemplate.replace("@INSPECTION_PROJECT_NAME", customJob.getInspectionProjectName());
+        loadedJobTemplate = loadedJobTemplate.replace("@INSPECTION_PROJECT_KEY", customJob.getInspectionProjectKey());
+        loadedJobTemplate = loadedJobTemplate.replace("@COMMAND_TEXT", customJob.getManifestScript());
+
+        return loadedJobTemplate;
+    }
+
 }

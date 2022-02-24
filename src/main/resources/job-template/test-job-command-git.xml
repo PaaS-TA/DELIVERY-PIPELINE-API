@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.6.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>@REPOSITORY_URL</url>
+        <credentialsId>@REPOSITORY_ACCOUNT_ID</credentialsId>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>*/@REPOSITORY_BRANCH</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>
+        @COMMAND_TEXT
+      </command>
+    </hudson.tasks.Shell>
+    <hudson.plugins.sonar.SonarRunnerBuilder plugin="sonar@2.6.1">
+      <project></project>
+      <properties>sonar.projectName=@INSPECTION_PROJECT_NAME
+        sonar.projectKey=@INSPECTION_PROJECT_KEY
+        sonar.projectVersion=1.0
+        sonar.sources=.
+        sonar.sourceEncoding=UTF-8
+        sonar.scm.provider=git
+        sonar.log.level=TRACE
+      </properties>
+      <javaOpts></javaOpts>
+      <additionalArguments></additionalArguments>
+      <jdk>(Inherit From Job)</jdk>
+      <task></task>
+    </hudson.plugins.sonar.SonarRunnerBuilder>
+  </builders>
+  <publishers>
+    <quality.gates.jenkins.plugin.QGPublisher plugin="quality-gates@2.5">
+      <jobConfigData>
+        <projectKey>@INSPECTION_PROJECT_KEY</projectKey>
+        <sonarInstanceName>sonarqube-5.6.7</sonarInstanceName>
+      </jobConfigData>
+      <buildDecision>
+        <qualityGatesProvider>
+          <qualityGateResponseParser/>
+          <sonarHttpRequester/>
+          <sonarInstanceValidationService/>
+        </qualityGatesProvider>
+      </buildDecision>
+      <jobConfigurationService/>
+      <jobExecutionService/>
+    </quality.gates.jenkins.plugin.QGPublisher>
+  </publishers>
+  <buildWrappers/>
+</project>

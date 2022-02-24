@@ -583,6 +583,13 @@ public class JobService {
         String jobGuid = procSetJobGuid(JobType.DEPLOY);
         customJob.setJobGuid(jobGuid);
 
+        // GET JOB DETAIL FROM DATABASE
+        CustomJob buildJobDetail = procGetJobDetail(customJob.getBuildJobId());
+        customJob.setLanguageType(buildJobDetail.getLanguageType());
+        customJob.setLanguageTypeVersion(buildJobDetail.getLanguageTypeVersion());
+        customJob.setBuilderType(buildJobDetail.getBuilderType());
+        customJob.setBuilderTypeVersion(buildJobDetail.getBuilderTypeVersion());
+
         // CREATE DEPLOY JOB TO CI SERVER
         commonService.procGetCiServer(customJob.getCiServerUrl()).createJob(jobGuid, jobTemplateService.getDeployJobTemplate(customJob), true);
 
@@ -613,6 +620,13 @@ public class JobService {
         resultModel.setResultStatus(RESULT_STATUS_SUCCESS);
 
         String reqJobName = customJob.getJobName();
+
+        // GET JOB DETAIL FROM DATABASE
+        CustomJob buildJobDetail = procGetJobDetail(customJob.getBuildJobId());
+        customJob.setLanguageType(buildJobDetail.getLanguageType());
+        customJob.setLanguageTypeVersion(buildJobDetail.getLanguageTypeVersion());
+        customJob.setBuilderType(buildJobDetail.getBuilderType());
+        customJob.setBuilderTypeVersion(buildJobDetail.getBuilderTypeVersion());
 
         // UPDATE DEPLOY JOB TO CI SERVER
         commonService.procGetCiServer(customJob.getCiServerUrl()).updateJob(customJob.getJobGuid(), jobTemplateService.getDeployJobTemplate(customJob), true);
